@@ -1,0 +1,119 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-03-24T06:56:11.661Z",
+  "activeFeatures": [
+    "phase2-rag-review",
+    "water-sewage-review",
+    "rag"
+  ],
+  "primaryFeature": "phase2-rag-review",
+  "features": {
+    "phase2-rag-review": {
+      "phase": "design",
+      "phaseNumber": 2,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [
+        "FR-01: KDS pgvector 임베딩",
+        "FR-02: Gemini Embedding API",
+        "FR-03: RAG 벡터 검색",
+        "FR-04: 출처 태그",
+        "FR-05: 설계값 vs 기준값 비교 판정",
+        "FR-06: ReviewCard 렌더링",
+        "FR-07: 인허가 15종 판정",
+        "FR-08: PermitCard 렌더링",
+        "FR-09: Layer 2 임시 임베딩",
+        "FR-10: Layer 1+2 동시 검색",
+        "FR-11: KDS 임베딩 CLI 스크립트"
+      ],
+      "documents": {
+        "plan": "docs/01-plan/features/phase2-rag-review.plan.md",
+        "design": "docs/02-design/features/phase2-rag-review.design.md"
+      },
+      "timestamps": {
+        "started": "2026-03-24T07:00:00.000Z",
+        "lastUpdated": "2026-03-24T07:00:00.000Z"
+      }
+    },
+    "water-sewage-review": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-24T06:53:48.803Z",
+        "lastUpdated": "2026-03-24T06:53:48.803Z"
+      },
+      "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\lib\\embedding.ts"
+    },
+    "rag": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-24T06:54:39.913Z",
+        "lastUpdated": "2026-03-24T06:56:11.661Z"
+      },
+      "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\lib\\rag\\reviewer.ts"
+    }
+  },
+  "pipeline": {
+    "currentPhase": 2,
+    "level": "Dynamic",
+    "phaseHistory": [
+      {
+        "phase": 1,
+        "completedAt": "2026-03-24T06:30:00.000Z",
+        "note": "Phase 1 완료: UI 골격 + 파일 파싱 + Gemini 채팅 + 품질 개선"
+      }
+    ]
+  },
+  "session": {
+    "startedAt": "2026-03-24T06:42:53.758Z",
+    "onboardingCompleted": true,
+    "lastActivity": "2026-03-24T06:56:11.661Z"
+  },
+  "history": [
+    {
+      "timestamp": "2026-03-24T07:00:00.000Z",
+      "feature": "phase2-rag-review",
+      "phase": "plan",
+      "action": "created"
+    },
+    {
+      "timestamp": "2026-03-24T07:10:00.000Z",
+      "feature": "phase2-rag-review",
+      "phase": "design",
+      "action": "created"
+    },
+    {
+      "timestamp": "2026-03-24T06:53:48.803Z",
+      "feature": "water-sewage-review",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T06:54:39.913Z",
+      "feature": "rag",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T06:55:15.557Z",
+      "feature": "rag",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-24T06:56:11.661Z",
+      "feature": "rag",
+      "phase": "do",
+      "action": "updated"
+    }
+  ]
+}
