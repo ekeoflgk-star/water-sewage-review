@@ -1,153 +1,193 @@
 # 프로젝트 진행 상황
 
 > 이 문서는 Claude Code에서 작업을 이어받기 위한 상세 현황 기록입니다.
-> 마지막 업데이트: 2026-03-24
+> 마지막 업데이트: 2026-03-24 (Phase 2 완료 시점)
 
 ---
 
-## 완료된 작업
-
-### 1. 프로젝트 초기화 ✅
-- Next.js 14 (App Router) + TypeScript + Tailwind CSS 프로젝트 생성
-- package.json에 Phase 1 전체 의존성 포함
-- npm install 완료, npm run dev 실행 확인
-- tsconfig.json, tailwind.config.ts, postcss.config.js, next.config.js 설정 완료
-- .gitignore, .eslintrc.json 설정 완료
-
-### 2. Gemini API 연동 ✅
-- aistudio.google.com에서 API 키 발급 완료
-- .env.local에 GEMINI_API_KEY 등록 완료
-- lib/gemini.ts 구현:
-  - 모델: `gemini-2.5-flash` (안정 버전)
-  - temperature: 0.3 (기술 검토용 낮은 창의성)
-  - maxOutputTokens: 8192
-  - 시스템 프롬프트: 상하수도 설계 검토 전문가 역할
-  - `truncateText()`: 30,000자 제한 (대용량 PDF 대응)
-  - `buildPrompt()`: 파일 컨텍스트 + 대화 이력 조합
-
-### 3. 3분할 UI 레이아웃 ✅
-- app/page.tsx: 메인 레이아웃 (좌240px + 중앙flex + 우280px)
-- 상태 관리: files, messages, isStreaming을 page.tsx에서 관리
-- 패널 간 데이터 흐름 구현 완료
-
-### 4. 파일 업로드 + 파싱 ✅
-- components/file/DropZone.tsx: react-dropzone 기반 드래그앤드롭
-- components/file/FileList.tsx: 파일 목록 + 그룹 분류 UI
-- lib/parsers/index.ts: PDF(pdf-parse), DOCX(mammoth), XLSX(SheetJS) 통합 파서
-- app/api/parse/route.ts: 파일 파싱 API (50MB 제한, 100K자 트렁케이트)
-- 실제 테스트: 33.5MB PDF 업로드 + 파싱 성공 확인
-
-### 5. 채팅 기능 ✅
-- components/chat/ChatInput.tsx: 입력창 (Shift+Enter 줄바꿈, 자동 높이)
-- components/chat/MessageList.tsx: 메시지 목록 (자동 스크롤, 스트리밍 인디케이터)
-- app/api/chat/route.ts: Gemini 스트리밍 API
-  - ReadableStream으로 실시간 토큰 전송
-  - 에러별 한글 메시지 (API키 무효, 사용량 초과, 요청 크기 초과, 모델 없음)
-  - 프롬프트 크기 콘솔 로깅
-- 실제 테스트: PDF 문서 기반 Q&A 작동 확인
-
-### 6. Phase 2 준비 ✅
-- components/chat/ReviewCard.tsx: 설계 검토 결과 카드 (3단계 판정 UI)
-- components/chat/PermitCard.tsx: 인허가 검토 결과 카드 (4단계 판정 UI)
-- lib/supabase.ts: Supabase 클라이언트 + 테이블 스키마 주석
-- types/index.ts: 전체 타입 정의 (파일, 채팅, 검토, 인허가, 법령, 지식베이스)
-
-### 7. 버그 수정 이력
-- **모델명 오류**: `gemini-2.5-flash-preview-05-20` → `gemini-2.5-flash` (API 500 에러 해결)
-- **대용량 PDF**: truncateText() 추가로 30,000자 제한 (API 요청 크기 초과 해결)
+## 배포 정보
+- **Vercel URL**: https://water-sewage-review.vercel.app
+- **GitHub**: https://github.com/ekeoflgk-star/water-sewage-review
+- **Supabase**: https://qmsintfrhxcpmevcksil.supabase.co
 
 ---
 
-## Phase 1 남은 작업 (우선순위순)
+## 전체 완료 현황
 
-### P1 — 반드시 완료
-1. **GitHub 레포지토리 생성 + 첫 커밋**
-   ```
-   git init
-   git add .
-   git commit -m "feat: Phase 1 완료 — UI 골격 + 파일 파싱 + Gemini 채팅"
-   git remote add origin https://github.com/[username]/water-sewage-review.git
-   git push -u origin main
-   ```
+### Phase 1 — 환경 세팅 + UI 골격 ✅
+- [x] Next.js 14 + TypeScript + Tailwind CSS 초기화
+- [x] Gemini 2.5 Flash API 연동 (스트리밍 채팅)
+- [x] 3분할 UI (파일관리 / 채팅 / 법령참조)
+- [x] PDF·DOCX·XLSX 업로드 + 파싱 (33.5MB 테스트 성공)
+- [x] GitHub 레포 생성 + Vercel 배포
 
-2. **Vercel 배포 연결**
-   - vercel.com에서 GitHub 연결
-   - 환경변수 GEMINI_API_KEY 설정
-   - 자동 배포 확인
+### Phase 2 — RAG 검토 + 인허가 ✅
+- [x] Supabase 프로젝트 생성 + pgvector 활성화
+- [x] knowledge_base, project_documents 테이블 + RPC 함수 2개
+- [x] 임베딩 모델 gemini-embedding-001 적용
+- [x] KDS 임베딩 CLI 스크립트 (scripts/embed-kds.ts) — resume 기능 포함
+- [x] RAG 검색 엔진 (lib/rag/index.ts) — Layer 1 + Layer 2 동시 검색
+- [x] 설계 검토 엔진 (lib/rag/reviewer.ts) — 설계값 추출 + 규칙 비교 + RAG 판정
+- [x] 인허가 15종 자동 판단 (lib/rag/permit.ts) — 키워드 + 수치 조건
+- [x] 인허가 원스톱 체크리스트 (components/chat/PermitChecklist.tsx)
+- [x] 인허가 일정 간트 차트 (components/chat/PermitGantt.tsx) — 선후행 + 크리티컬 패스
+- [x] 검토 보고서 PDF 출력 (lib/report/ReportTemplate.tsx + app/api/report/route.ts)
+- [x] UI 개선: 마크다운 렌더링, ReviewCard/PermitCard pill 배지
+- [x] 검토 API (app/api/review/route.ts) + 임베딩 API (app/api/embed/route.ts)
 
-3. **Supabase 프로젝트 생성**
-   - supabase.com에서 프로젝트 생성
-   - pgvector 확장 활성화: `CREATE EXTENSION IF NOT EXISTS vector;`
-   - .env.local에 Supabase 키 3개 추가
-
-### P2 — 품질 개선
-4. **채팅 마크다운 렌더링 개선**
-   - react-markdown 또는 marked 라이브러리 추가
-   - 코드블록, 테이블, 링크 등 포맷 지원
-
-5. **파일 파싱 개선**
-   - 대용량 PDF 페이지별 분할 파싱
-   - 파싱 진행률 표시 (프로그레스 바)
-   - XLSX 시트별 미리보기
-
-6. **에러 UI 개선**
-   - 토스트 알림 컴포넌트
-   - 파일 업로드 실패 시 재시도 버튼
-   - API 키 미설정 시 안내 화면
+### Phase 3 — 법령 연동 (부분 완료)
+- [x] 법제처 Open API 프록시 (app/api/law/route.ts) — 코드 완성
+- [x] LawNavigator 컴포넌트 — 검색 + 조문 상세 + 바로가기
+- [ ] **법제처 API 키 발급 대기 중** (OC=test 차단됨, https://open.law.go.kr 에서 발급 필요)
 
 ---
 
-## Phase 2 로드맵 (4~7주)
+## ⚠️ 즉시 해야 할 작업 (이어받는 사람 필독)
 
-### 핵심 목표
-수리계산서 업로드 후 KDS 조항 인용하며 자동 판정
+### 1. KDS 임베딩 이어하기 (일일 쿼터 리셋 후)
+```bash
+cd "D:\우종현\100.AI실무 아이템\01-2.설계 품질 검토\water-sewage-review"
+npx tsx scripts/embed-kds.ts data/kds/
+```
+- **상수도설계기준**: ~601/715 청크 완료 (84%) → 나머지 ~114개
+- **하수도설계기준**: 0/721 청크 → 전체 721개
+- resume 기능 내장: 이미 저장된 청크는 자동 건너뜀
+- Gemini 무료 티어 일일 한도: 임베딩 1,000건/일
+- 전체 완료까지 약 2일 소요
 
-### 작업 순서
-1. **Supabase 테이블 생성**
-   - `knowledge_base` (Layer 1: 사전 임베딩 DB)
-   - `project_documents` (Layer 2: 사용자 업로드 임시)
-   - pgvector 인덱스 생성
+### 2. 법제처 API 키 등록
+- https://open.law.go.kr 에서 API 키 발급
+- app/api/law/route.ts 9행의 `const OC = 'test';`를 발급받은 키로 교체
+- .env.local에 `LAW_API_KEY=발급받은키` 추가 권장
 
-2. **KDS 문서 임베딩 파이프라인**
-   - KDS PDF 다운로드 (kcsc.re.kr) — 우선순위 상위 5개부터
-   - 텍스트 추출 → 청크 분할 (500~1000자)
-   - Gemini Embedding API로 벡터화
-   - Supabase에 저장
-
-3. **RAG 검색 엔진 (lib/rag/)**
-   - 사용자 질문/문서 → 벡터 검색 → 관련 KDS 조항 조회
-   - Layer 1 + Layer 2 동시 검색
-   - 유사도 점수 기반 상위 5~10개 결과 반환
-   - 출처 태그 포함: [KDS 61 40 10 §3.2] vs [업로드: 김천시 기본계획 p.45]
-
-4. **검토 엔진 (app/api/review/route.ts)**
-   - 155개 검토항목 체크리스트 기반 자동 판정
-   - 설계값 vs 기준값 추출 및 비교
-   - ReviewCard 구조화된 응답 생성
-
-5. **인허가 자동 판단**
-   - 15종 인허가 트리거 키워드 추출
-   - 키워드 + 수치 매칭 → 4단계 판정
-   - PermitCard 구조화된 응답 생성
-
-6. **사용자 업로드 문서 임베딩 (Layer 2)**
-   - 업로드 → 파싱 → 청크 → 임시 벡터 저장
-   - 프로젝트 종료 시 자동 삭제
+### 3. 통합 테스트
+- PDF 업로드 → 채팅에 "검토 시작" 입력 → ReviewCard + PermitCard 확인
+- "검토 보고서 다운로드" 버튼 → PDF 생성 확인
+- 인허가 체크리스트 + 간트 차트 표시 확인
 
 ---
 
-## 비용 구조
-- 목표: Phase 1~3 전체 개인 비용 $0
-- Gemini API: 무료 티어 (분당 10회, 하루 ~250회)
-- Supabase: 무료 플랜 (500MB)
-- Vercel: 무료 Hobby 플랜
-- 법제처 API: 무료
-- KDS PDF: 무료 다운로드 (kcsc.re.kr)
+## 아직 안 한 기능 (우선순위순)
+
+| 순위 | 기능 | 설명 | 난이도 |
+|------|------|------|--------|
+| 1 | 수리계산 자동 검증 | Manning 공식 역산, 유속-관경-경사 삼각관계 검증 | 중 |
+| 2 | 프로젝트 이력 관리 | 검토 결과 DB 저장 + 버전 비교 + 대시보드 | 중 |
+| 3 | 지자체별 조례 대응 | 시군구 선택 → 조례 차이 반영 | 하 |
+| 4 | 수량산출서 검증 | 단가 적용 검증, 물량 역산, 누락 감지 | 중 |
+| 5 | 도면 CAD 연동 | DWG/DXF 읽기, 종단면도 자동 추출 | 상 |
+| 6 | 협업 기능 | 코멘트, 검토자 지정, 알림 | 중 |
+
+---
+
+## 기술 스택 상세
+
+| 구분 | 기술 | 버전/설정 |
+|------|------|----------|
+| 프레임워크 | Next.js (App Router) | 14.2.15 |
+| 언어 | TypeScript strict | |
+| 스타일 | Tailwind CSS | |
+| AI | Google Gemini 2.5 Flash | @google/generative-ai |
+| 임베딩 | gemini-embedding-001 | 768차원 |
+| DB | Supabase PostgreSQL + pgvector | 무료 플랜 |
+| PDF 보고서 | @react-pdf/renderer | |
+| 파일 파싱 | pdf-parse, mammoth, xlsx | |
+| 호스팅 | Vercel Hobby | 무료 |
+
+---
+
+## 환경변수 (.env.local)
+```
+GEMINI_API_KEY=AIzaSyCsOphLh5Mt-SnMkL5qq8cvf3gPeE04G9s
+NEXT_PUBLIC_SUPABASE_URL=https://qmsintfrhxcpmevcksil.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtc2ludGZyaHhjcG1ldmNrc2lsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMzM0MzYsImV4cCI6MjA4OTkwOTQzNn0.KTWIZ4RK-Cm4OH7lyJyUYzPPIlFO9lVa_n730jpFsFY
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtc2ludGZyaHhjcG1ldmNrc2lsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDMzMzQzNiwiZXhwIjoyMDg5OTA5NDM2fQ.rWx1p8gQjEkOmV05k9wCWQFKJjP7E4PI6eHbhg1Wk-U
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+---
+
+## 폴더 구조 (Phase 2 완료 시점)
+```
+water-sewage-review/
+├── CLAUDE.md                        ← 프로젝트 규칙 (필독)
+├── PROJECT_BRIEFING.md              ← 전체 기획서
+├── PROJECT_STATUS.md                ← 이 파일 (진행 현황)
+├── .env.local                       ← API 키 (Git 제외)
+├── app/
+│   ├── layout.tsx                   ✅
+│   ├── page.tsx                     ✅ 3분할 + 검토 흐름
+│   ├── globals.css                  ✅
+│   └── api/
+│       ├── chat/route.ts            ✅ Gemini 스트리밍
+│       ├── parse/route.ts           ✅ PDF/DOCX/XLSX 파싱
+│       ├── review/route.ts          ✅ 설계 검토 + 인허가 API
+│       ├── embed/route.ts           ✅ 사용자 문서 임베딩
+│       ├── law/route.ts             ✅ 법제처 Open API (키 필요)
+│       └── report/route.ts          ✅ PDF 보고서 생성
+├── components/
+│   ├── layout/
+│   │   ├── FilePanel.tsx            ✅
+│   │   ├── ChatPanel.tsx            ✅
+│   │   └── LawPanel.tsx             ✅
+│   ├── file/
+│   │   ├── DropZone.tsx             ✅
+│   │   └── FileList.tsx             ✅
+│   ├── chat/
+│   │   ├── ChatInput.tsx            ✅
+│   │   ├── MessageList.tsx          ✅ 마크다운 + 카드 렌더링
+│   │   ├── ReviewCard.tsx           ✅ pill 배지 + 컬러코딩
+│   │   ├── PermitCard.tsx           ✅ pill 배지 + 아이콘
+│   │   ├── PermitChecklist.tsx      ✅ 원스톱 체크리스트
+│   │   ├── PermitGantt.tsx          ✅ 간트 차트
+│   │   └── ReportButton.tsx         ✅ PDF 다운로드
+│   └── law/
+│       └── LawNavigator.tsx         ✅ 법령 검색 + 조문 상세
+├── lib/
+│   ├── gemini.ts                    ✅ Gemini 클라이언트
+│   ├── embedding.ts                 ✅ gemini-embedding-001
+│   ├── supabase.ts                  ✅ Supabase 클라이언트
+│   ├── permit-info.ts               ✅ 15종 인허가 상세정보
+│   ├── permit-schedule.ts           ✅ 일정 계산 + 크리티컬 패스
+│   ├── parsers/index.ts             ✅ 파일 파서
+│   ├── rag/
+│   │   ├── index.ts                 ✅ RAG 검색 엔진
+│   │   ├── chunker.ts              ✅ 텍스트 청크 분할
+│   │   ├── reviewer.ts             ✅ 설계 검토 로직
+│   │   └── permit.ts               ✅ 인허가 판단 로직
+│   └── report/
+│       └── ReportTemplate.tsx       ✅ PDF 보고서 템플릿
+├── scripts/
+│   └── embed-kds.ts                 ✅ KDS 임베딩 CLI (resume 지원)
+├── data/
+│   └── kds/
+│       ├── 상수도설계기준_2022_통합본.pdf  (2.9MB)
+│       └── 하수도설계기준_2023_통합본.pdf  (2.0MB)
+└── types/
+    └── index.ts                     ✅ 전체 타입 정의
+```
+
+---
+
+## Supabase DB 현황
+- **knowledge_base**: 상수도 ~601행 저장됨 (하수도 미완료)
+- **project_documents**: 빈 테이블 (사용자 업로드 시 저장)
+- **RPC 함수**: search_knowledge, search_project_docs 생성 완료
+- **인덱스**: ivfflat vector_cosine_ops 적용
+
+---
+
+## 커밋 이력
+```
+14395e8 fix: Vercel 빌드 오류 수정 + 인허가 간트 차트 추가
+472b87a feat: Phase 2 완료 — RAG 검토 + 인허가 + 보고서 PDF + 법령 API
+bd676b6 feat: Phase 1 완료 — UI 골격 + 파일 파싱 + Gemini 채팅 + RAG 코드 준비
+```
 
 ---
 
 ## 주의사항
-- Windows 환경: `cp` 대신 `copy`, 경로 구분자 `\`
-- 프로젝트 경로: `D:\우종현\100.AI실무 아이템\01-1.설계 품질 검토\water-sewage-review`
-- API 키 보안: .env.local에만 저장, GitHub에 절대 올리지 않기
-- Gemini 무료 한도: 분당 10회, 하루 ~250회 — 개발 중 과도한 테스트 주의
+- **OS**: Windows 10 (cp 대신 copy, 경로 구분자 \)
+- **Gemini 무료 한도**: 분당 100 임베딩, 일 1,000 임베딩
+- **API 키 보안**: .env.local에만 저장, GitHub에 절대 올리지 않기
+- **Anthropic/OpenAI API 사용 금지**: Gemini만 사용 (CLAUDE.md 규칙)
