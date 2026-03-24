@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import type { PermitCard as PermitCardType, PermitVerdict } from '@/types';
 import { PERMIT_VERDICT_LABELS } from '@/types';
 import { PERMIT_INFO_MAP, type PermitInfo } from '@/lib/permit-info';
+import { PermitGantt } from './PermitGantt';
 
 interface PermitChecklistProps {
   permitCards: PermitCardType[];
@@ -167,8 +168,6 @@ export function PermitChecklist({ permitCards }: PermitChecklistProps) {
   // 유효한 카드만 (not-applicable 제외는 이미 permit.ts에서 처리됨)
   const cards = permitCards.filter((c) => c.verdict !== 'not-applicable');
 
-  if (cards.length === 0) return null;
-
   const toggleItem = useCallback((id: string) => {
     setExpandedItems((prev) => ({ ...prev, [id]: !prev[id] }));
   }, []);
@@ -182,6 +181,8 @@ export function PermitChecklist({ permitCards }: PermitChecklistProps) {
     });
     setExpandedItems(newState);
   }, [allExpanded, cards]);
+
+  if (cards.length === 0) return null;
 
   // 판정별 요약 카운트
   const requiredCount = cards.filter((c) => c.verdict === 'required').length;
@@ -270,6 +271,9 @@ export function PermitChecklist({ permitCards }: PermitChecklistProps) {
           </div>
         </div>
       )}
+
+      {/* 간트 차트: 일정 계획 */}
+      <PermitGantt permitCards={permitCards} />
     </div>
   );
 }

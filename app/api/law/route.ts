@@ -23,20 +23,32 @@ interface LawSearchItem {
   efYd?: string;
 }
 
+/** 법령 상세 내부 구조 */
+interface LawDetail {
+  기본정보?: BasicInfo;
+  BasicInfo?: BasicInfo;
+  조문?: ArticlesSection;
+  Articles?: ArticlesSection;
+}
+
+interface BasicInfo {
+  법령ID?: number;
+  법령명_한글?: string;
+  법령명한글?: string;
+  시행일자?: string;
+  소관부처명?: string;
+  법령구분명?: string;
+}
+
+interface ArticlesSection {
+  조문단위?: ArticleUnit[] | ArticleUnit;
+  ArticleUnit?: ArticleUnit[] | ArticleUnit;
+}
+
 /** 조문 상세 응답 구조 */
 interface LawServiceResponse {
-  기본정보?: {
-    법령ID?: number;
-    법령명_한글?: string;
-    시행일자?: string;
-    소관부처명?: string;
-    법령구분명?: string;
-  };
-  조문?: {
-    조문단위?: ArticleUnit[] | ArticleUnit;
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+  법령?: LawDetail;
+  Law?: LawDetail;
 }
 
 interface ArticleUnit {
@@ -45,8 +57,12 @@ interface ArticleUnit {
   조문제목?: string;
   조문내용?: string;
   조문시행일자?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  항?: any;
+  항?: ParagraphData | ParagraphData[];
+}
+
+interface ParagraphData {
+  항번호?: string;
+  항내용?: string;
 }
 
 /**
@@ -183,9 +199,9 @@ async function fetchLawDetail(lawId: string) {
   }
 
   // 응답 구조 파싱: { 법령: { 기본정보: {...}, 조문: { 조문단위: [...] } } }
-  const lawData = data?.법령 || data?.Law || data;
-  const basicInfo = lawData?.기본정보 || lawData?.BasicInfo || {};
-  const articlesSection = lawData?.조문 || lawData?.Articles || {};
+  const lawData: LawDetail = data?.법령 || data?.Law || {};
+  const basicInfo: BasicInfo = lawData?.기본정보 || lawData?.BasicInfo || {};
+  const articlesSection: ArticlesSection = lawData?.조문 || lawData?.Articles || {};
   const rawArticles = articlesSection?.조문단위 || articlesSection?.ArticleUnit || [];
 
   // 배열 정규화
@@ -224,8 +240,7 @@ async function fetchLawDetail(lawId: string) {
 /**
  * 항(Paragraph) 파싱 헬퍼
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseParagraphs(paragraphData: any): Array<{ number: string; content: string }> {
+function parseParagraphs(paragraphData: ParagraphData | ParagraphData[] | undefined): Array<{ number: string; content: string }> {
   if (!paragraphData) return [];
 
   const items = Array.isArray(paragraphData) ? paragraphData : [paragraphData];
