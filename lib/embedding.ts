@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 /** Gemini text-embedding-004 모델 (768차원, 무료) */
-const EMBEDDING_MODEL = 'text-embedding-004';
+const EMBEDDING_MODEL = 'gemini-embedding-001';
 
 /** 배치 최대 크기 */
 const BATCH_SIZE = 100;
@@ -64,15 +64,14 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
  * 배치 임베딩 + 1회 재시도
  */
 async function embedBatchWithRetry(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  model: any,
+  model: ReturnType<InstanceType<typeof GoogleGenerativeAI>['getGenerativeModel']>,
   texts: string[],
   retries: number = 1
 ): Promise<number[][]> {
   try {
     const result = await model.batchEmbedContents({
       requests: texts.map((text) => ({
-        content: { parts: [{ text }] },
+        content: { role: 'user', parts: [{ text }] },
       })),
     });
     return result.embeddings.map(

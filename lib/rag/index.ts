@@ -77,7 +77,7 @@ async function searchLayer2(
 ): Promise<KnowledgeResult[]> {
   const { data, error } = await supabaseAdmin.rpc('search_project_docs', {
     query_embedding: JSON.stringify(queryEmbedding),
-    p_session_id: sessionId,
+    p_session_id: sessionId,  // project_documents.project_id와 매칭
     match_count: topK,
     match_threshold: threshold,
   });
