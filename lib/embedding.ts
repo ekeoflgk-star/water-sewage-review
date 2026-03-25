@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // Gemini Embedding 모델 초기화
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-/** Gemini text-embedding-004 모델 (768차원, 무료) */
+/** Gemini gemini-embedding-001 모델 (3072차원, 무료) */
 const EMBEDDING_MODEL = 'gemini-embedding-001';
 
 /** 배치 최대 크기 */

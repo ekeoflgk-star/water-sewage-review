@@ -136,54 +136,22 @@ function splitIntoChunks(text: string, maxSize = 800, overlap = 100): Chunk[] {
 }
 
 // ============================================================
-// Gemini 배치 임베딩
+// Gemini 배치 임베딩 (batchEmbedContents — 1회 호출로 최대 100개)
 // ============================================================
-const EMBEDDING_MODEL = 'gemini-embedding-001';
-// 무료 티어: 분당 100 요청 → 개별 임베딩 + 적절한 대기
-const BATCH_SIZE = 50; // 로그 출력 단위
-const REQUEST_DELAY_MS = 800; // 요청 간 0.8초 (분당 ~75건)
-const MAX_RETRIES = 3;
+const EMBEDDING_MODEL = 'gemini-embedding-001'; // 3072차원 — Supabase 스키마 맞춤
+const BATCH_SIZE = 100; // batchEmbedContents 최대 100개/요청
+const BATCH_DELAY_MS = 5000; // 배치 간 5초 대기
+const MAX_RETRIES = 5;
 
-async function embedSingle(text: string): Promise<number[]> {
+/** 배치 임베딩 — 최대 100개 텍스트를 1회 API 호출로 처리 */
+async function embedBatch(texts: string[]): Promise<number[][]> {
   const model = genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
-  const result = await model.embedContent(text);
-  return result.embedding.values;
-}
-
-async function embedAllChunks(chunks: Chunk[]): Promise<number[][]> {
-  const results: number[][] = [];
-
-  for (let i = 0; i < chunks.length; i++) {
-    if (i % BATCH_SIZE === 0) {
-      console.log(`  📊 임베딩 중... ${i + 1}~${Math.min(i + BATCH_SIZE, chunks.length)} / ${chunks.length}`);
-    }
-
-    for (let retry = 0; retry <= MAX_RETRIES; retry++) {
-      try {
-        const embedding = await embedSingle(chunks[i].content);
-        results.push(embedding);
-        break;
-      } catch (error: unknown) {
-        const status = (error as { status?: number }).status;
-        if (status === 429 && retry < MAX_RETRIES) {
-          const waitSec = 30 * (retry + 1);
-          console.warn(`  ⚠️ 레이트 리밋 — ${waitSec}초 대기 (${retry + 1}/${MAX_RETRIES})...`);
-          await delay(waitSec * 1000);
-        } else if (retry === MAX_RETRIES) {
-          throw error;
-        } else {
-          // 기타 오류도 짧게 대기 후 재시도
-          await delay(3000);
-        }
-      }
-    }
-
-    // 요청 간 대기 (레이트 리밋 방지)
-    if (i < chunks.length - 1) {
-      await delay(REQUEST_DELAY_MS);
-    }
-  }
-  return results;
+  const result = await model.batchEmbedContents({
+    requests: texts.map((text) => ({
+      content: { role: 'user', parts: [{ text }] },
+    })),
+  });
+  return result.embeddings.map((e) => e.values);
 }
 
 function delay(ms: number) {
@@ -261,6 +229,60 @@ async function getExistingChunkCount(source: string): Promise<number> {
   return count || 0;
 }
 
+/** 배치 단위로 임베딩 + Supabase 저장 (100개씩) */
+async function embedAndSaveBatch(
+  chunks: Chunk[],
+  source: string
+): Promise<boolean> {
+  for (let retry = 0; retry <= MAX_RETRIES; retry++) {
+    try {
+      // 1. 배치 임베딩 (1회 API 호출로 최대 100개)
+      const embeddings = await embedBatch(chunks.map((c) => c.content));
+
+      // 2. Supabase INSERT
+      const rows = chunks.map((chunk, i) => ({
+        source,
+        section: chunk.section || null,
+        page: chunk.page || null,
+        content: chunk.content,
+        embedding: JSON.stringify(embeddings[i]),
+        metadata: JSON.stringify({
+          chunkIndex: chunk.index,
+          charCount: chunk.content.length,
+        }),
+      }));
+
+      const { error } = await supabase.from('knowledge_base').insert(rows);
+      if (error) {
+        console.error(`  ❌ INSERT 오류:`, error.message);
+        return false;
+      }
+      return true;
+    } catch (error: unknown) {
+      const status = (error as { status?: number }).status;
+      const msg = (error as { message?: string }).message || '';
+      console.warn(`  ⚠️ 배치 오류 (retry ${retry + 1}/${MAX_RETRIES}): status=${status} ${msg.slice(0, 120)}`);
+
+      if (status === 429) {
+        if (retry < MAX_RETRIES) {
+          const waitSec = 60 * (retry + 1);
+          console.warn(`  ⏳ ${waitSec}초 대기 후 재시도...`);
+          await delay(waitSec * 1000);
+        } else {
+          console.warn(`\n  ⛔ 반복 429 오류 — 쿼터 소진 가능. 나중에 다시 실행하세요.`);
+          return false;
+        }
+      } else if (retry < MAX_RETRIES) {
+        await delay(5000);
+      } else {
+        console.error(`  ❌ 최대 재시도 초과`);
+        return false;
+      }
+    }
+  }
+  return false;
+}
+
 async function processFile(filePath: string, source?: string) {
   const filename = path.basename(filePath);
   const kdsSource = source || inferSourceFromFilename(filename);
@@ -302,16 +324,31 @@ async function processFile(filePath: string, source?: string) {
     console.log(`  ⏩ ${startIdx}개 건너뛰고 ${remainingChunks.length}개부터 이어서 진행`);
   }
 
-  // 3. 임베딩
-  console.log('  3️⃣ Gemini 임베딩...');
-  const embeddings = await embedAllChunks(remainingChunks);
-  console.log(`     임베딩 완료: ${embeddings.length}개 벡터 (${embeddings[0]?.length}차원)`);
+  // 3. 배치 임베딩 + 저장 (100개씩)
+  const totalBatches = Math.ceil(remainingChunks.length / BATCH_SIZE);
+  console.log(`  3️⃣ 배치 임베딩 시작 (${BATCH_SIZE}개/배치, 총 ${totalBatches}배치, API 호출 ${totalBatches}회)`);
+  let saved = 0;
 
-  // 4. Supabase 저장
-  console.log('  4️⃣ Supabase 저장...');
-  await insertToSupabase(remainingChunks, embeddings, kdsSource);
+  for (let b = 0; b < totalBatches; b++) {
+    const batchStart = b * BATCH_SIZE;
+    const batch = remainingChunks.slice(batchStart, batchStart + BATCH_SIZE);
+    console.log(`  📊 배치 ${b + 1}/${totalBatches}: 청크 ${startIdx + batchStart + 1}~${startIdx + batchStart + batch.length}/${chunks.length}`);
 
-  console.log(`  ✅ 완료: ${filename} → ${remainingChunks.length}개 청크 저장됨 (총 ${startIdx + remainingChunks.length}/${chunks.length})\n`);
+    const ok = await embedAndSaveBatch(batch, kdsSource);
+    if (!ok) {
+      console.log(`\n  📌 중단됨: ${saved}개 저장 완료 (총 ${startIdx + saved}/${chunks.length})`);
+      console.log(`  💡 다시 실행하면 자동으로 이어서 진행됩니다.`);
+      return;
+    }
+    saved += batch.length;
+
+    // 배치 간 대기
+    if (b < totalBatches - 1) {
+      await delay(BATCH_DELAY_MS);
+    }
+  }
+
+  console.log(`  ✅ 완료: ${filename} → ${saved}개 저장 (총 ${startIdx + saved}/${chunks.length})\n`);
 }
 
 async function main() {

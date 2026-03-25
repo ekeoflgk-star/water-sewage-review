@@ -1,121 +1,96 @@
 # 상하수도 설계 성과품 AI 검토 플랫폼
 
 ## 프로젝트 개요
-상하수도 설계 성과품(PDF·DOCX·XLSX)을 업로드하면 법령·KDS 설계기준과 자동 대조해 적합/부적합 판정하는 사내 웹 도구.
+상하수도 설계 성과품(PDF·DOCX·XLSX·DXF)을 업로드하면 법령·KDS 설계기준과 자동 대조해 적합/부적합 판정하는 사내 웹 도구.
 - 회사 부서 내 사용 (회원제·구독제 없음)
 - 사용자는 URL 접속만 하면 됨 (Claude.ai 계정 불필요)
 
 ## 현재 상태 ✅
-- **Phase 1 환경 세팅 완료** (2024-03 기준)
-- Next.js 14 프로젝트 초기화 완료
-- 전체 컴포넌트 코드 작성 완료
-- npm install 완료, npm run dev 실행 확인
-- Gemini API 키 발급 및 .env.local 등록 완료
-- PDF 업로드 + 파싱 작동 확인 (33.5MB PDF 테스트 성공)
-- Gemini 채팅 스트리밍 작동 확인
-- **오류 수정 완료**: 모델명 gemini-2.5-flash로 변경, 텍스트 트렁케이트(30,000자) 적용
+- **Phase 1 완료**: UI 골격 + 파일 파싱 + Gemini 채팅
+- **Phase 2 완료**: RAG 검토 + 인허가 15종 + 보고서 PDF + 법령 API
+- **Phase 2.5 완료 (92%)**: DXF 인허가 자동 분석 (PDCA Act-1 완료)
+- **KDS 임베딩 대기**: 상수도+하수도 1,436청크, Gemini 쿼터 소진으로 대기 중
+- **빌드**: `npm run build` 성공 확인 (2026-03-25)
 - **OS: Windows** (cp 대신 copy 명령 사용)
-
-## 기술 스택
-- **프레임워크**: Next.js 14 (App Router) + TypeScript + Tailwind CSS
-- **AI**: Google Gemini 2.5 Flash (`@google/generative-ai`)
-- **DB**: Supabase (PostgreSQL + pgvector) — 무료 플랜 (Phase 2부터)
-- **호스팅**: Vercel 무료 Hobby 플랜
-- **파일 파싱**: pdf-parse(PDF) / mammoth(DOCX) / xlsx SheetJS(XLSX)
-- **파일 업로드**: react-dropzone
-- **인증**: NextAuth.js (Phase 4)
-- **리포트**: @react-pdf/renderer (Phase 4)
 
 ## ⛔ 절대 금지
 - Anthropic Claude API 사용 금지 (비용 발생)
 - OpenAI GPT API 사용 금지 (비용 발생)
 - ✅ Google Gemini 2.5 Flash만 사용 (무료 API 키)
 
+## 기술 스택
+- **프레임워크**: Next.js 14 (App Router) + TypeScript + Tailwind CSS
+- **AI**: Google Gemini 2.5 Flash (`@google/generative-ai`)
+- **임베딩**: gemini-embedding-001 (3072차원)
+- **DB**: Supabase (PostgreSQL + pgvector) — 무료 플랜, VECTOR(3072)
+- **호스팅**: Vercel 무료 Hobby 플랜
+- **파일 파싱**: pdf-parse(PDF) / mammoth(DOCX) / xlsx(XLSX) / dxf-parser(DXF)
+- **파일 업로드**: react-dropzone
+- **리포트**: @react-pdf/renderer
+
 ## 환경변수 (.env.local)
 ```
 GEMINI_API_KEY=AIzaSy...        # 필수 — aistudio.google.com에서 발급
-NEXT_PUBLIC_SUPABASE_URL=       # Phase 2부터 필요
-NEXT_PUBLIC_SUPABASE_ANON_KEY=  # Phase 2부터 필요
-SUPABASE_SERVICE_ROLE_KEY=      # Phase 2부터 필요
+NEXT_PUBLIC_SUPABASE_URL=       # Supabase 프로젝트 URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=  # Supabase anon key
+SUPABASE_SERVICE_ROLE_KEY=      # Supabase service role key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
+
+## 즉시 해야 할 작업
+1. **KDS 임베딩 실행**: `npx tsx scripts/embed-kds.ts data/kds/` (쿼터: 오후 4시 KST 리셋)
+2. **법제처 API 키**: open.law.go.kr에서 발급 → app/api/law/route.ts OC 값 교체
+3. **미커밋 DXF 기능**: git add + commit 필요
+4. **DXF PDCA 보고서**: `/pdca report dxf-permit-analysis` 실행 가능
+
+## DXF 인허가 분석 기능 (Phase 2.5)
+- 레이어 접두사 컨벤션: `$`=설계, `#`=인허가, 없음=일반/지적
+- #레이어 10종 → 인허가 자동 매핑 (도로점용, 하천점용, 농지전용 등)
+- 지적 텍스트 파싱: "154-7 답" → 지목→전용/점용 허가 매핑
+- 도넛형 필지 판별: Ray Casting + 면적비 임계값 0.8
+- PDCA 문서: docs/01-plan, 02-design, 03-analysis 참조
+- Gap 분석 92% (G-01,G-03,G-04 Low 우선순위 잔여)
 
 ## 폴더 구조
 ```
 water-sewage-review/
-├── CLAUDE.md                    ← 이 파일
-├── PROJECT_BRIEFING.md          ← 전체 프로젝트 기획서 (필독)
-├── PROJECT_STATUS.md            ← 진행 상황 + 남은 작업 상세
-├── package.json
-├── .env.local                   ← API 키 (Git 제외)
+├── CLAUDE.md                        ← 이 파일
+├── PROJECT_BRIEFING.md              ← 전체 프로젝트 기획서 (필독)
+├── PROJECT_STATUS.md                ← 진행 상황 + 남은 작업 상세 (필독)
 ├── app/
-│   ├── layout.tsx               ✅ 완료
-│   ├── page.tsx                 ✅ 완료 (3분할 레이아웃)
-│   ├── globals.css              ✅ 완료
+│   ├── page.tsx                     ✅ 3분할 + 검토 + DXF 분석
 │   └── api/
-│       ├── chat/route.ts        ✅ 완료 (Gemini 스트리밍 + 에러 핸들링)
-│       ├── parse/route.ts       ✅ 완료 (PDF/DOCX/XLSX 파싱)
-│       └── review/route.ts      ⬜ Phase 2 플레이스홀더
-├── components/
-│   ├── layout/
-│   │   ├── FilePanel.tsx        ✅ 완료
-│   │   ├── ChatPanel.tsx        ✅ 완료
-│   │   └── LawPanel.tsx         ✅ 완료 (Phase 3 플레이스홀더)
-│   ├── file/
-│   │   ├── DropZone.tsx         ✅ 완료
-│   │   └── FileList.tsx         ✅ 완료
-│   ├── chat/
-│   │   ├── ChatInput.tsx        ✅ 완료
-│   │   ├── MessageList.tsx      ✅ 완료
-│   │   ├── ReviewCard.tsx       ✅ 완료 (Phase 2 준비)
-│   │   └── PermitCard.tsx       ✅ 완료 (Phase 2 준비)
-│   └── law/
-│       └── LawNavigator.tsx     ✅ 완료 (Phase 3 플레이스홀더)
+│       ├── chat/route.ts            ✅ Gemini 스트리밍
+│       ├── parse/route.ts           ✅ PDF/DOCX/XLSX/DXF 파싱
+│       ├── review/route.ts          ✅ 설계 검토 + 인허가
+│       ├── embed/route.ts           ✅ 사용자 문서 임베딩
+│       ├── law/route.ts             ✅ 법제처 Open API (키 필요)
+│       ├── report/route.ts          ✅ PDF 보고서 생성
+│       └── dxf-analyze/route.ts     ✅ DXF 인허가 분석
+├── components/chat/
+│   ├── MessageList.tsx              ✅ 마크다운 + 모든 카드 렌더링
+│   ├── DxfAnalysisCard.tsx          ✅ DXF 분석 결과 카드
+│   ├── PermitGuide.tsx              ✅ 설계사 가이드 (DXF 연동)
+│   ├── PermitChecklist.tsx          ✅ 원스톱 체크리스트
+│   └── PermitGantt.tsx              ✅ 간트 차트
 ├── lib/
-│   ├── gemini.ts                ✅ 완료 (모델: gemini-2.5-flash, truncateText 포함)
-│   ├── parsers/index.ts         ✅ 완료
-│   └── supabase.ts              ✅ 완료 (Phase 2 테이블 스키마 주석 포함)
-└── types/index.ts               ✅ 완료 (전체 타입 정의)
+│   ├── parsers/dxf.ts               ✅ DXF 파싱 (dxf-parser)
+│   ├── dxf/
+│   │   ├── layer-classifier.ts      ✅ 레이어 분류
+│   │   ├── cadastral-parser.ts      ✅ 지적 파싱 + 도넛 판별
+│   │   └── permit-mapper.ts         ✅ 통합 분석
+│   └── rag/                         ✅ RAG 검색 + 검토 + 인허가
+├── scripts/embed-kds.ts             ✅ KDS 임베딩 CLI (4초 간격)
+├── data/kds/                        상수도·하수도 설계기준 PDF
+├── types/
+│   ├── index.ts                     ✅ 전체 타입
+│   └── dxf.ts                       ✅ DXF 타입 (8개)
+└── docs/                            PDCA 문서 (plan/design/analysis)
 ```
-
-## UI 구조 — 3분할 레이아웃
-```
-┌──────────────┬─────────────────────────────────┬───────────────┐
-│ 좌측 240px   │ 중앙 flex                        │ 우측 280px    │
-│ FilePanel    │ ChatPanel                        │ LawPanel      │
-│ 파일관리      │ Gemini 스트리밍 채팅               │ 법령참조       │
-│ 드래그앤드롭  │ 검토의견 카드 (Phase 2)             │ Phase 3       │
-│ 6종 그룹분류  │ 인허가 카드 (Phase 2)              │               │
-└──────────────┴─────────────────────────────────┴───────────────┘
-```
-
-## 파일 그룹 분류 (6종)
-1. 설계설명서 (design-description)
-2. 수리계산서 (hydraulic-calculation)
-3. 설계도면 (drawing)
-4. 시방서 (specification)
-5. 수량산출서 (quantity-calculation)
-6. 검토기준문서 (review-criteria) — 사용자 업로드
 
 ## 검토 판정 기준
-- 설계 검토 3단계: 🟢 적합(pass) / 🔴 부적합(fail) / 🟡 확인필요(check)
-- 인허가 검토 4단계: ✅ 필수(required) / ⚠️ 조건부(conditional) / ℹ️ 규모검토(scale-review) / ❌ 해당없음(not-applicable)
-
-## 개발 Phase
-| Phase | 기간 | 주요 기능 | 상태 |
-|-------|------|----------|------|
-| 1 | 1~3주 | 환경세팅 + UI 골격 + 파일 파싱 + Gemini 채팅 | ✅ 기본 완료 |
-| 2 | 4~7주 | KDS→pgvector 임베딩 + RAG 검토 + 인허가 검토 | ⬜ 미시작 |
-| 3 | 8~11주 | 법제처 Open API + 파도타기 탐색 UI | ⬜ 미시작 |
-| 4 | 12~16주 | PDF 보고서 + NextAuth 인증 + 최적화 | ⬜ 미시작 |
-
-## Phase 1 남은 작업
-1. UI 품질 개선 — 반응형, 로딩 상태, 에러 표시 다듬기
-2. 파일 파싱 개선 — 대용량 PDF 처리 최적화, 페이지별 분할
-3. 채팅 개선 — 마크다운 렌더링, 코드블록, 테이블 포맷
-4. GitHub 레포지토리 생성 + 첫 커밋
-5. Vercel 배포 연결
-6. Supabase 프로젝트 생성 + pgvector 활성화 (Phase 2 준비)
+- 설계 검토 3단계: 적합(pass) / 부적합(fail) / 확인필요(check)
+- 인허가 검토 4단계: 필수(required) / 조건부(conditional) / 규모검토(scale-review) / 해당없음(not-applicable)
 
 ## 코딩 컨벤션
 - 한국어 주석 사용
@@ -126,6 +101,7 @@ water-sewage-review/
 - 파일명: PascalCase(컴포넌트), camelCase(유틸), kebab-case(라우트 폴더)
 
 ## 주요 참조 문서
+- PROJECT_STATUS.md: 진행 현황 + 이어받기 가이드 (필독)
 - PROJECT_BRIEFING.md: 전체 프로젝트 기획 (지식베이스 3-Layer, 검토 155항목, 인허가 15종 등)
-- types/index.ts: 전역 타입 정의 참조
-- lib/supabase.ts: Phase 2 테이블 스키마 (주석으로 정리됨)
+- types/index.ts + types/dxf.ts: 전역 타입 정의
+- docs/02-design/features/dxf-permit-analysis.design.md: DXF 기능 설계서

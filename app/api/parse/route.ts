@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
 
     // 파일 확장자 확인
     const ext = file.name.split('.').pop()?.toLowerCase();
-    if (!['pdf', 'docx', 'xlsx', 'xls'].includes(ext || '')) {
+    if (!['pdf', 'docx', 'xlsx', 'xls', 'dxf'].includes(ext || '')) {
       return NextResponse.json(
-        { error: '지원하지 않는 파일 형식입니다. (PDF, DOCX, XLSX만 가능)' },
+        { error: '지원하지 않는 파일 형식입니다. (PDF, DOCX, XLSX, DXF 가능)' },
         { status: 400 }
       );
     }

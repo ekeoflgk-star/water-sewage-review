@@ -6,8 +6,11 @@ import remarkGfm from 'remark-gfm';
 import { ReviewCard } from '@/components/chat/ReviewCard';
 import { PermitCard } from '@/components/chat/PermitCard';
 import { PermitChecklist } from '@/components/chat/PermitChecklist';
+import { PermitGuide } from '@/components/chat/PermitGuide';
 import { ReportButton } from '@/components/chat/ReportButton';
+import { DxfAnalysisCard } from '@/components/chat/DxfAnalysisCard';
 import type { ChatMessage } from '@/types';
+import type { DxfAnalysisResult } from '@/types/dxf';
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -165,7 +168,8 @@ function MessageBubble({ message }: { message: ChatMessage }) {
 
   const hasReviewCards = message.reviewCards && message.reviewCards.length > 0;
   const hasPermitCards = message.permitCards && message.permitCards.length > 0;
-  const hasCards = hasReviewCards || hasPermitCards;
+  const hasDxfAnalysis = !!message.dxfAnalysis;
+  const hasCards = hasReviewCards || hasPermitCards || hasDxfAnalysis;
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
@@ -231,11 +235,22 @@ function MessageBubble({ message }: { message: ChatMessage }) {
 
             {/* 인허가 원스톱 체크리스트 */}
             <PermitChecklist permitCards={message.permitCards!} />
+
+            {/* 설계사 인허가 가이드 */}
+            <PermitGuide
+              permitCards={message.permitCards!}
+              dxfPermits={message.dxfAnalysis?.permits}
+            />
           </div>
         )}
 
+        {/* DXF 인허가 분석 결과 */}
+        {hasDxfAnalysis && (
+          <DxfAnalysisCard result={message.dxfAnalysis!} />
+        )}
+
         {/* 검토 보고서 다운로드 버튼 — 검토 카드가 있는 메시지에 표시 */}
-        {hasCards && (
+        {(hasReviewCards || hasPermitCards) && (
           <ReportButton
             reviewCards={message.reviewCards || []}
             permitCards={message.permitCards || []}

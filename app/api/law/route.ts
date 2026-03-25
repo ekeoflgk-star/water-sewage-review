@@ -4,8 +4,8 @@ export const runtime = 'nodejs';
 
 // 법제처 Open API 기본 URL
 const LAW_API_BASE = 'http://www.law.go.kr/DRF';
-// 테스트용 OC 코드 (추후 실제 키로 교체)
-const OC = 'test';
+// 기관코드(OC) — 법제처 로그인 이메일 ID
+const OC = process.env.LAW_API_OC || 'test';
 
 /** 법령 검색 결과 아이템 (법제처 API 응답 구조) */
 interface LawSearchItem {

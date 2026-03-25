@@ -8,7 +8,7 @@ import { useState, useCallback, useRef } from 'react';
 
 /** 법령 검색 결과 아이템 */
 interface LawItem {
-  id: number;
+  id: number | string;
   name: string;
   abbreviation: string;
   enforcementDate: string;
@@ -39,6 +39,130 @@ interface LawDetail {
 
 /** 컴포넌트 뷰 상태 */
 type ViewState = 'search' | 'articles' | 'article-detail';
+
+// ============================================================
+// 법제처 API 직접 호출 (브라우저 → 법제처, Vercel 우회)
+// ============================================================
+const LAW_API_BASE = 'http://www.law.go.kr/DRF';
+const LAW_OC = process.env.NEXT_PUBLIC_LAW_API_OC || 'jonghyeon';
+
+/** 법제처 API 검색 응답 파싱 */
+interface LawSearchRaw {
+  법령ID?: string;
+  법령명한글?: string;
+  법령약칭명?: string;
+  시행일자?: string;
+  공포일자?: string;
+  법령구분명?: string;
+  소관부처명?: string;
+  lId?: string;
+  lNm?: string;
+  efYd?: string;
+}
+
+interface ArticlesRaw {
+  조문단위?: RawArticle[] | RawArticle;
+  ArticleUnit?: RawArticle[] | RawArticle;
+}
+
+interface LawDetailRaw {
+  기본정보?: Record<string, string | number>;
+  BasicInfo?: Record<string, string | number>;
+  조문?: ArticlesRaw;
+  Articles?: ArticlesRaw;
+}
+
+interface RawArticle {
+  조문번호?: string;
+  조문여부?: string;
+  조문제목?: string;
+  조문내용?: string;
+  조문시행일자?: string;
+  항?: RawParagraph | RawParagraph[];
+}
+
+interface RawParagraph {
+  항번호?: string;
+  항내용?: string;
+}
+
+/** 법제처 직접 검색 */
+async function directSearchLaws(query: string, page: number = 1): Promise<{ totalCount: number; laws: LawItem[] }> {
+  const url = new URL(`${LAW_API_BASE}/lawSearch.do`);
+  url.searchParams.set('OC', LAW_OC);
+  url.searchParams.set('target', 'law');
+  url.searchParams.set('type', 'JSON');
+  url.searchParams.set('query', query);
+  url.searchParams.set('display', '20');
+  url.searchParams.set('page', String(page));
+
+  const res = await fetch(url.toString(), { signal: AbortSignal.timeout(10000) });
+  if (!res.ok) throw new Error(`법제처 API 오류: ${res.status}`);
+
+  const data = await res.json();
+  const lawSearch = data?.LawSearch || data?.lawSearch || data;
+  const totalCnt = lawSearch?.totalCnt || lawSearch?.TotalCnt || 0;
+  const rawLaws: LawSearchRaw[] = Array.isArray(lawSearch?.law || lawSearch?.Law)
+    ? (lawSearch?.law || lawSearch?.Law)
+    : (lawSearch?.law || lawSearch?.Law) ? [lawSearch.law || lawSearch.Law] : [];
+
+  const laws: LawItem[] = rawLaws.map((item) => ({
+    id: item.법령ID || item.lId || 0,
+    name: item.법령명한글 || item.lNm || '(법령명 없음)',
+    abbreviation: item.법령약칭명 || '',
+    enforcementDate: item.시행일자 || item.efYd || '',
+    type: item.법령구분명 || '',
+    department: item.소관부처명 || '',
+  }));
+
+  return { totalCount: parseInt(String(totalCnt), 10) || 0, laws };
+}
+
+/** 법제처 직접 조문 조회 */
+async function directFetchLawDetail(lawId: string | number): Promise<LawDetail> {
+  const url = new URL(`${LAW_API_BASE}/lawService.do`);
+  url.searchParams.set('OC', LAW_OC);
+  url.searchParams.set('target', 'law');
+  url.searchParams.set('type', 'JSON');
+  url.searchParams.set('ID', String(lawId));
+
+  const res = await fetch(url.toString(), { signal: AbortSignal.timeout(15000) });
+  if (!res.ok) throw new Error(`법제처 API 오류: ${res.status}`);
+
+  const data = await res.json();
+  const lawData: LawDetailRaw = data?.법령 || data?.Law || {};
+  const basicInfo = lawData?.기본정보 || lawData?.BasicInfo || {};
+  const articlesSection = lawData?.조문 || lawData?.Articles || {};
+  const rawArticles = articlesSection?.조문단위 || articlesSection?.ArticleUnit || [];
+  const articleList: RawArticle[] = Array.isArray(rawArticles) ? rawArticles : rawArticles ? [rawArticles] : [];
+
+  const info = {
+    id: basicInfo?.법령ID || lawId,
+    name: (basicInfo?.법령명_한글 || basicInfo?.법령명한글 || '(법령명 없음)') as string,
+    enforcementDate: (basicInfo?.시행일자 || '') as string,
+    department: (basicInfo?.소관부처명 || '') as string,
+    type: (basicInfo?.법령구분명 || '') as string,
+  };
+
+  const articles: ArticleItem[] = articleList
+    .filter((a) => a.조문여부 === 'Y' || a.조문내용)
+    .map((a) => ({
+      number: a.조문번호 || '',
+      title: a.조문제목 || '',
+      content: a.조문내용 || '',
+      enforcementDate: a.조문시행일자 || '',
+      paragraphs: parseParagraphs(a.항),
+    }));
+
+  return { info, articles };
+}
+
+/** 항 파싱 */
+function parseParagraphs(data: RawParagraph | RawParagraph[] | undefined): Array<{ number: string; content: string }> {
+  if (!data) return [];
+  const items = Array.isArray(data) ? data : [data];
+  return items.map((p) => ({ number: p?.항번호 || '', content: p?.항내용 || '' }));
+}
 
 // ============================================================
 // 바로가기 법령 목록 — 상하수도 관련 주요 법령
@@ -72,7 +196,7 @@ export function LawNavigator() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // --------------------------------------------------------
-  // 법령 검색
+  // 법령 검색 (직접 호출 → 서버 fallback)
   // --------------------------------------------------------
   const handleSearch = useCallback(async (query: string, page: number = 1) => {
     if (!query.trim()) return;
@@ -83,52 +207,62 @@ export function LawNavigator() {
     setCurrentPage(page);
 
     try {
-      const res = await fetch(
-        `/api/law?q=${encodeURIComponent(query.trim())}&page=${page}`
-      );
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => null);
-        throw new Error(errData?.error || `검색 실패 (${res.status})`);
-      }
-
-      const data = await res.json();
-      setSearchResults(data.laws || []);
-      setTotalCount(data.totalCount || 0);
+      // 1차: 브라우저에서 법제처 API 직접 호출
+      const data = await directSearchLaws(query.trim(), page);
+      setSearchResults(data.laws);
+      setTotalCount(data.totalCount);
       setViewState('search');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '검색 중 오류가 발생했습니다.');
-      setSearchResults([]);
+    } catch {
+      // 2차: CORS 등 실패 시 서버 프록시 fallback
+      try {
+        const res = await fetch(
+          `/api/law?q=${encodeURIComponent(query.trim())}&page=${page}`
+        );
+        if (!res.ok) throw new Error(`검색 실패 (${res.status})`);
+        const data = await res.json();
+        setSearchResults(data.laws || []);
+        setTotalCount(data.totalCount || 0);
+        setViewState('search');
+      } catch (err2) {
+        setError(err2 instanceof Error ? err2.message : '검색 중 오류가 발생했습니다.');
+        setSearchResults([]);
+      }
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   // --------------------------------------------------------
-  // 법령 조문 상세 조회
+  // 법령 조문 상세 조회 (직접 호출 → 서버 fallback)
   // --------------------------------------------------------
-  const handleSelectLaw = useCallback(async (lawId: number, lawName: string) => {
+  const handleSelectLaw = useCallback(async (lawId: number | string, lawName: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const res = await fetch(`/api/law?id=${lawId}`);
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => null);
-        throw new Error(errData?.error || `조문 조회 실패 (${res.status})`);
-      }
-
-      const data: LawDetail = await res.json();
-      // 법령명이 비어있으면 선택한 법령명으로 보완
+      // 1차: 브라우저에서 법제처 API 직접 호출
+      const data = await directFetchLawDetail(lawId);
       if (data.info && (!data.info.name || data.info.name === '(법령명 없음)')) {
         data.info.name = lawName;
       }
       setLawDetail(data);
       setSelectedArticle(null);
       setViewState('articles');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '조문 조회 중 오류가 발생했습니다.');
+    } catch {
+      // 2차: CORS 등 실패 시 서버 프록시 fallback
+      try {
+        const res = await fetch(`/api/law?id=${lawId}`);
+        if (!res.ok) throw new Error(`조문 조회 실패 (${res.status})`);
+        const data: LawDetail = await res.json();
+        if (data.info && (!data.info.name || data.info.name === '(법령명 없음)')) {
+          data.info.name = lawName;
+        }
+        setLawDetail(data);
+        setSelectedArticle(null);
+        setViewState('articles');
+      } catch (err2) {
+        setError(err2 instanceof Error ? err2.message : '조문 조회 중 오류가 발생했습니다.');
+      }
     } finally {
       setIsLoading(false);
     }

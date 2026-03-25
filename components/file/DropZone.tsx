@@ -15,6 +15,7 @@ function getFileType(name: string): UploadedFile['type'] | null {
   if (ext === 'pdf') return 'pdf';
   if (ext === 'docx') return 'docx';
   if (ext === 'xlsx' || ext === 'xls') return 'xlsx';
+  if (ext === 'dxf') return 'dxf';
   return null;
 }
 
@@ -100,6 +101,8 @@ export function DropZone({ onFilesAdded }: DropZoneProps) {
         '.xlsx',
       ],
       'application/vnd.ms-excel': ['.xls'],
+      'application/dxf': ['.dxf'],
+      'image/vnd.dxf': ['.dxf'],
     },
     multiple: true,
   });
@@ -132,7 +135,7 @@ export function DropZone({ onFilesAdded }: DropZoneProps) {
           </>
         )}
       </p>
-      <p className="text-[10px] text-slate-400 mt-1">PDF · DOCX · XLSX (50MB 이하)</p>
+      <p className="text-[10px] text-slate-400 mt-1">PDF · DOCX · XLSX · DXF (50MB 이하)</p>
     </div>
   );
 }

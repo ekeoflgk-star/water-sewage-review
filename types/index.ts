@@ -26,7 +26,7 @@ export interface UploadedFile {
   id: string;
   name: string;
   size: number;
-  type: 'pdf' | 'docx' | 'xlsx';
+  type: 'pdf' | 'docx' | 'xlsx' | 'dxf';
   group: FileGroup | null;       // 분류 전이면 null
   content?: string;               // 파싱된 텍스트 내용
   uploadedAt: Date;
@@ -51,6 +51,8 @@ export interface ChatMessage {
   reviewCards?: ReviewCard[];
   /** 메시지에 포함된 인허가 카드 (Phase 2) */
   permitCards?: PermitCard[];
+  /** DXF 인허가 분석 결과 */
+  dxfAnalysis?: import('./dxf').DxfAnalysisResult;
 }
 
 // ============================================================
