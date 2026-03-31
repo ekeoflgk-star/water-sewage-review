@@ -292,22 +292,23 @@ const QUICK_LAWS = [
 // ============================================================
 const SPECIFICATIONS = [
   // ── 상수도 직접 관련 ──
-  { label: '상수도공사 표준시방서', description: '취수·정수·송배수·급수 시설 시공', query: '상수도공사 표준시방서', category: '상수도' },
-  { label: '수도용 자재·제품 시방서', description: '수도관·밸브·이음관 자재 기준', query: '수도용 자재 위생안전기준', category: '상수도' },
-  { label: '상수관로 갱생공사 시방서', description: '노후관 세척·라이닝·갱생 기준', query: '상수관로 갱생공사 시방서', category: '상수도' },
+  // query: 법제처에서 검색 가능한 관련 법령명으로 매핑
+  { label: '상수도공사 표준시방서', description: '취수·정수·송배수·급수 시설 시공', query: '수도시설의 청소 및 위생관리 등에 관한 규칙', category: '상수도' },
+  { label: '수도용 자재·제품 시방서', description: '수도관·밸브·이음관 자재 기준', query: '수도용 자재와 제품의 위생안전기준 인증 등에 관한 규칙', category: '상수도' },
+  { label: '상수관로 갱생공사 시방서', description: '노후관 세척·라이닝·갱생 기준', query: '수도법', category: '상수도' },
   // ── 하수도 직접 관련 ──
-  { label: '하수도공사 표준시방서', description: '하수관로·맨홀·우수시설 시공', query: '하수도공사 표준시방서', category: '하수도' },
-  { label: '하수관로 비굴착공사 시방서', description: '추진·관삽입·반전경화 비굴착 공법', query: '하수관로 비굴착 보수공사', category: '하수도' },
-  { label: '하수관로 정비사업 시방서', description: '하수관로 조사·진단·보수·보강', query: '하수관로 정비사업 시방서', category: '하수도' },
-  { label: '하수처리시설 표준시방서', description: '하수처리장·슬러지처리 시공', query: '하수처리시설 표준시방서', category: '하수도' },
-  { label: '물재이용시설 시방서', description: '중수도·빗물이용·하수재이용 시설', query: '물재이용시설 설치 기준', category: '하수도' },
+  { label: '하수도공사 표준시방서', description: '하수관로·맨홀·우수시설 시공', query: '하수도법', category: '하수도' },
+  { label: '하수관로 비굴착공사 시방서', description: '추진·관삽입·반전경화 비굴착 공법', query: '하수도법 시행령', category: '하수도' },
+  { label: '하수관로 정비사업 시방서', description: '하수관로 조사·진단·보수·보강', query: '하수도법 시행규칙', category: '하수도' },
+  { label: '하수처리시설 표준시방서', description: '하수처리장·슬러지처리 시공', query: '하수도법', category: '하수도' },
+  { label: '물재이용시설 시방서', description: '중수도·빗물이용·하수재이용 시설', query: '물의 재이용 촉진 및 지원에 관한 법률', category: '하수도' },
   // ── 상하수도 공통 (토목·구조) ──
-  { label: '토목공사 표준시방서', description: '토공·기초·포장 등 토목 일반', query: '토목공사 표준시방서', category: '공통' },
-  { label: '콘크리트 표준시방서', description: '콘크리트 배합·타설·양생 기준', query: '콘크리트 표준시방서', category: '공통' },
-  { label: '건설공사 표준시방서', description: '건설공사 일반 시공 기준', query: '건설공사 표준시방서', category: '공통' },
-  { label: '도로공사 표준시방서', description: '도로 복구·포장·부대시설', query: '도로공사 표준시방서', category: '공통' },
-  { label: '터널공사 표준시방서', description: '개착·추진 터널 (관로 횡단)', query: '터널공사 표준시방서', category: '공통' },
-  { label: '가시설 안전기준 시방서', description: '흙막이·가물막이·가설구조물', query: '가시설 안전기준', category: '공통' },
+  { label: '토목공사 표준시방서', description: '토공·기초·포장 등 토목 일반', query: '건설기술 진흥법', category: '공통' },
+  { label: '콘크리트 표준시방서', description: '콘크리트 배합·타설·양생 기준', query: '건설기술 진흥법 시행령', category: '공통' },
+  { label: '건설공사 표준시방서', description: '건설공사 일반 시공 기준', query: '건설기술 진흥법', category: '공통' },
+  { label: '도로공사 표준시방서', description: '도로 복구·포장·부대시설', query: '도로법', category: '공통' },
+  { label: '터널공사 표준시방서', description: '개착·추진 터널 (관로 횡단)', query: '시설물의 안전 및 유지관리에 관한 특별법', category: '공통' },
+  { label: '가시설 안전기준 시방서', description: '흙막이·가물막이·가설구조물', query: '산업안전보건기준에 관한 규칙', category: '공통' },
 ];
 
 // ============================================================
@@ -976,7 +977,7 @@ export function LawNavigator() {
       {activeTab === 'specification' && isAtTabHome && (
         <div className="flex-1 overflow-y-auto p-3">
           <p className="text-xs font-medium text-slate-600 mb-2">상하수도 관련 시방서</p>
-          <p className="text-[10px] text-slate-400 mb-3">클릭하면 법제처에서 관련 법령을 검색합니다.</p>
+          <p className="text-[10px] text-slate-400 mb-3">클릭하면 관련 법령을 법제처에서 검색합니다.</p>
           {/* 카테고리별 그룹 */}
           {(['상수도', '하수도', '공통'] as const).map((cat) => {
             const items = SPECIFICATIONS.filter((s) => s.category === cat);
@@ -1004,6 +1005,7 @@ export function LawNavigator() {
                     >
                       <p className={`text-[11px] font-medium text-slate-700 group-hover:${c.text}`}>{spec.label}</p>
                       <p className="text-[10px] text-slate-400 mt-0.5">{spec.description}</p>
+                      <p className="text-[9px] text-blue-400 mt-0.5">→ {spec.query}</p>
                     </button>
                   ))}
                 </div>
