@@ -87,35 +87,23 @@
 - [x] **패널 리사이즈 CSS**: `[data-separator]` 상태별 스타일 (inactive/hover/active)
 - [x] **법령 패널 최대폭**: maxSize="70%" (사이트 절반 이상 확장 가능)
 - [ ] **파일관리 하위폴더 3레벨**: 미구현 (현재 2레벨)
-- [ ] **빌드 테스트**: Phase 4.5 변경사항 빌드 확인 필요
+- [x] **빌드 테스트**: ✅ 빌드 성공 확인 (2026-03-31, supabase.ts 더미URL 수정 포함)
 
 ---
 
 ## ⚠️ 즉시 해야 할 작업 (이어받는 사람 필독)
 
-### 1. KDS 임베딩 완료 (최우선) ★★★
+### 1. ~~KDS 임베딩~~ ✅ 완료 (2026-03-31)
 
-현재 `knowledge_base` 테이블에 **401행/1,436행** (27.9%) 저장됨. 나머지 1,035개 임베딩 필요.
-
-```bash
-# 프로젝트 루트에서 실행 (쿼터 리셋: 매일 오후 4시 KST)
-npx tsx scripts/embed-kds.ts data/kds/
-
-# 현황 확인
-npx tsx scripts/embed-kds.ts --check
-```
+`knowledge_base` 테이블에 **1,436행/1,436행** (100%) 저장 완료.
 
 | 문서 | 완료 | 전체 | 진행률 |
 |------|------|------|--------|
-| 상수도설계기준_2022_통합본 | 301 | 715 | 42.1% |
-| 하수도설계기준_2023_통합본 | 100 | 721 | 13.9% |
-| **합계** | **401** | **1,436** | **27.9%** |
+| 상수도설계기준_2022_통합본 | 715 | 715 | 100% ✅ |
+| 하수도설계기준_2023_통합본 | 721 | 721 | 100% ✅ |
+| **합계** | **1,436** | **1,436** | **100%** |
 
-**임베딩 완료 후 반드시 백업 실행:**
-```bash
-npx tsx scripts/backup-embeddings.ts --backup
-# → data/backup/knowledge_base_backup.json 생성 (현재 15.4MB, 완료 시 ~55MB)
-```
+**백업 완료:** `data/backup/knowledge_base_backup.json` (55.2MB, 1,436행)
 
 ### 2. Supabase에 review_history 테이블 생성
 ```sql
@@ -177,12 +165,12 @@ M  types/index.ts                   ← parentId, uploadProgress 필드
 
 ### 5. Phase 4.5에서 발견된 서버/UI 문제점 (코드 분석 결과)
 
-**🔴 심각한 문제 (수정 필요)**
-1. DXF 파일 UTF-8 인코딩 에러 처리 미흡 (`app/api/dxf-analyze/route.ts:40`)
-2. Supabase 이력 저장에 `.catch()` 누락 (`app/api/review/route.ts:68-82`)
-3. 파일 업로드 XHR 타임아웃 미설정 (`components/file/DropZone.tsx:82-83`)
-4. Gemini 에러 코드 문자열 매칭 취약 (`app/api/chat/route.ts:90-103`)
-5. 임베딩 배열 범위 체크 부재 (`app/api/embed/route.ts:67-75`)
+**~~🔴 심각한 문제~~ ✅ 모두 수정 완료 (2026-03-31 확인)**
+1. ~~DXF 파일 UTF-8 인코딩~~ → UTF-8/EUC-KR/latin1 3단 fallback 구현
+2. ~~Supabase .catch() 누락~~ → .catch() 추가됨
+3. ~~XHR 타임아웃 미설정~~ → 2분 타임아웃 + 핸들러 구현
+4. ~~Gemini 에러 매칭 취약~~ → HTTP 코드 + 문자열 이중 매칭 구현
+5. ~~임베딩 범위 체크 부재~~ → 길이 불일치 + 개별 유효성 검증 구현
 
 **🟡 중요 개선 (UX/성능)**
 1. 다중 파일 순차 업로드 → 병렬 처리 권장
@@ -390,11 +378,11 @@ SELECT source, COUNT(*) FROM knowledge_base GROUP BY source;
 
 | 순위 | 기능 | 설명 | 난이도 |
 |------|------|------|--------|
-| 1 | **KDS 임베딩 완료** | 나머지 1,035청크 (~11배치) | 하 |
+| ~~1~~ | ~~**KDS 임베딩 완료**~~ | ✅ 2026-03-31 완료 (1,436/1,436) | - |
 | 2 | **review_history 테이블 생성** | Supabase SQL Editor에서 SQL 실행 | 하 |
 | 3 | **Git commit + push** | 40+ 파일 미커밋 (빌드 확인 필요) | 하 |
 | 4 | **파일관리 하위폴더 3레벨** | 현재 2레벨 → 3레벨 중첩 (ProjectManager.tsx) | 중 |
-| 5 | **🔴 서버 버그 수정 5건** | DXF 인코딩, Supabase .catch, XHR 타임아웃 등 | 중 |
+| ~~5~~ | ~~**서버 버그 수정 5건**~~ | ✅ 모두 수정 완료 확인 (2026-03-31) | - |
 | 6 | **상태 영속화** | localStorage로 파일/메시지/프로젝트 자동 저장 | 중 |
 | 7 | **검토 결과 필터링** | 적합/부적합/확인필요 탭 필터 + 정렬 | 중 |
 | 8 | **채팅 빠른 명령 버튼** | [검토 시작] [DXF 분석] [법령 검색] 클릭 버튼 | 하 |
@@ -440,14 +428,14 @@ LAW_API_OC=jonghyeon                        # 서버 사이드용
 ---
 
 ## Supabase DB 현황
-- **knowledge_base**: **401행/1,436행** (27.9% 완료, 임베딩 진행 중)
-  - 상수도설계기준: 301/715 | 하수도설계기준: 100/721
+- **knowledge_base**: **1,436행/1,436행** (100% 완료, 2026-03-31)
+  - 상수도설계기준: 715/715 | 하수도설계기준: 721/721
   - 스키마: VECTOR(3072), source/section/page/content/embedding/metadata
 - **project_documents**: 빈 테이블 (사용자 업로드 시 저장)
 - **review_history**: **미생성** (scripts/create-review-history.sql 실행 필요)
 - **RPC 함수**: search_knowledge, search_project_docs 생성 완료
 - **인덱스**: ivfflat vector_cosine_ops 적용
-- **백업**: data/backup/knowledge_base_backup.json (401행, 15.4MB)
+- **백업**: data/backup/knowledge_base_backup.json (1,436행, 55.2MB)
 
 ---
 

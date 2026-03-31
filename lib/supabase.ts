@@ -1,14 +1,24 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
+// 환경변수 미설정 시 빌드 실패 방지 — 더미 URL 사용 (런타임에서 isSupabaseConfigured()로 체크)
+const DUMMY_URL = 'https://placeholder.supabase.co';
+const DUMMY_KEY = 'placeholder';
+
 /** 클라이언트 사이드 Supabase (익명 키) */
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase: SupabaseClient = createClient(
+  supabaseUrl || DUMMY_URL,
+  supabaseAnonKey || DUMMY_KEY
+);
 
 /** 서버 사이드 Supabase (서비스 키 — 관리자 권한) */
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+export const supabaseAdmin: SupabaseClient = createClient(
+  supabaseUrl || DUMMY_URL,
+  supabaseServiceKey || DUMMY_KEY
+);
 
 /**
  * Phase 2에서 사용할 테이블 구조 (참고용 주석)

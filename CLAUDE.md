@@ -12,8 +12,8 @@
 - **Phase 3 완료**: 법령 API + 3단비교(인용+위임조문) + 조례 바로가기
 - **Phase 4 완료**: 리사이즈 패널 + 업로드 진행률 + 하위폴더 + 법령 탭 개선
 - **Phase 4.5 진행중**: 추가참고문서 기능 + 3단비교 UI 확대 + 패널 접힘 표시
-- **KDS 임베딩 대기**: 상수도+하수도 1,436청크 중 401행 완료 (27.9%)
-- **빌드**: Phase 4까지 `npm run build` 성공 확인, Phase 4.5 빌드 미확인
+- **KDS 임베딩 완료**: 상수도+하수도 1,436청크 전체 완료 (100%) — 백업 55.2MB
+- **빌드**: Phase 4.5까지 `npm run build` 성공 확인 (2026-03-31)
 - **미커밋**: Phase 3.5 ~ 4.5 변경사항 모두 미커밋 (40+ 파일)
 - **OS: Windows** (cp 대신 copy 명령 사용)
 
@@ -42,11 +42,11 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 ## 즉시 해야 할 작업
-1. **npm run build 확인**: Phase 4.5 변경사항 빌드 확인 필요
-2. **Git commit + push**: 40+ 파일 미커밋 (Phase 3.5~4.5 전체)
-3. **KDS 임베딩 실행**: `npx tsx scripts/embed-kds.ts data/kds/` (쿼터: 오후 4시 KST 리셋)
+1. ~~**npm run build 확인**~~: ✅ 빌드 성공 (2026-03-31, supabase.ts 더미URL 수정)
+2. **Git commit + push**: 문서 업데이트 + supabase.ts 수정 미커밋
+3. ~~**KDS 임베딩 실행**~~: ✅ 완료 (2026-03-31, 1,436/1,436, 백업 55.2MB)
 4. **review_history 테이블 생성**: Supabase SQL Editor에서 `scripts/create-review-history.sql` 실행
-5. **🔴 서버 버그 5건 수정**: PROJECT_STATUS.md "Phase 4.5 서버/UI 문제점" 참조
+5. ~~**서버 버그 5건 수정**~~: ✅ 모두 수정 완료 확인 (2026-03-31)
 
 ## DXF 인허가 분석 기능 (Phase 2.5)
 - 레이어 접두사 컨벤션: `$`=설계, `#`=인허가, 없음=일반/지적
