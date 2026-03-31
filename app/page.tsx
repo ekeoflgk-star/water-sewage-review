@@ -9,8 +9,13 @@ import {
   saveProjects, loadProjects,
   saveActiveProjectId, loadActiveProjectId,
   saveSessionId, loadSessionId,
+  saveSessions, loadSessions,
+  saveSessionMessages, loadSessionMessages,
+  saveSessionFiles, loadSessionFiles,
+  saveSessionProjects, loadSessionProjects,
+  deleteSessionData,
 } from '@/lib/storage';
-import type { UploadedFile, ChatMessage, ReviewCard, PermitCard, Project } from '@/types';
+import type { UploadedFile, ChatMessage, ReviewCard, PermitCard, Project, Session } from '@/types';
 import type { DxfAnalysisResult } from '@/types/dxf';
 
 // SSR 비활성화 — react-resizable-panels가 클라이언트에서 px→flex-grow 변환 시
@@ -32,6 +37,10 @@ export default function Home() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
 
+  // 세션 관리
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string>('');
+
   // 검토 상태
   const [isReviewing, setIsReviewing] = useState(false);
   const sessionIdRef = useRef<string>(crypto.randomUUID());
@@ -39,42 +48,105 @@ export default function Home() {
 
   // ───── localStorage 복원 (최초 마운트) ─────
   useEffect(() => {
-    const savedMessages = loadMessages<ChatMessage>();
-    const savedFiles = loadFiles<UploadedFile>();
-    const savedProjects = loadProjects<Project>();
-    const savedActiveProjectId = loadActiveProjectId();
-    const savedSessionId = loadSessionId();
+    // 세션 목록 복원
+    let savedSessions = loadSessions<Session>();
+    let currentSessionId = loadSessionId() || '';
 
-    if (savedMessages.length > 0) setMessages(savedMessages);
-    if (savedFiles.length > 0) setFiles(savedFiles);
-    if (savedProjects.length > 0) setProjects(savedProjects);
+    // 기존 단일 세션 데이터 마이그레이션
+    if (savedSessions.length === 0) {
+      const savedMessages = loadMessages<ChatMessage>();
+      const savedFiles = loadFiles<UploadedFile>();
+      const savedProjects = loadProjects<Project>();
+      const id = currentSessionId || crypto.randomUUID();
+      const firstMsg = savedMessages[0]?.content || '';
+      const title = firstMsg.length > 0
+        ? firstMsg.slice(0, 30) + (firstMsg.length > 30 ? '...' : '')
+        : '새 대화';
+      const newSession: Session = {
+        id,
+        title,
+        createdAt: savedMessages[0]?.timestamp || new Date(),
+        updatedAt: savedMessages[savedMessages.length - 1]?.timestamp || new Date(),
+      };
+      savedSessions = [newSession];
+      currentSessionId = id;
+      // 기존 데이터를 세션별 스토리지로 마이그레이션
+      if (savedMessages.length > 0) saveSessionMessages(id, savedMessages);
+      if (savedFiles.length > 0) saveSessionFiles(id, savedFiles);
+      if (savedProjects.length > 0) saveSessionProjects(id, savedProjects);
+      saveSessions(savedSessions);
+      saveSessionId(id);
+    }
+
+    // 활성 세션이 없으면 첫 번째 세션 선택
+    if (!currentSessionId && savedSessions.length > 0) {
+      currentSessionId = savedSessions[0].id;
+    }
+
+    // 해당 세션 데이터 로드
+    setSessions(savedSessions);
+    setActiveSessionId(currentSessionId);
+    sessionIdRef.current = currentSessionId;
+
+    const sessionMessages = loadSessionMessages<ChatMessage>(currentSessionId);
+    const sessionFiles = loadSessionFiles<UploadedFile>(currentSessionId);
+    const sessionProjects = loadSessionProjects<Project>(currentSessionId);
+    const savedActiveProjectId = loadActiveProjectId();
+
+    if (sessionMessages.length > 0) setMessages(sessionMessages);
+    if (sessionFiles.length > 0) setFiles(sessionFiles);
+    if (sessionProjects.length > 0) setProjects(sessionProjects);
     if (savedActiveProjectId) setActiveProjectId(savedActiveProjectId);
-    if (savedSessionId) sessionIdRef.current = savedSessionId;
-    else saveSessionId(sessionIdRef.current);
 
     setIsHydrated(true);
   }, []);
 
-  // ───── 상태 변경 시 자동 저장 ─────
+  // ───── 상태 변경 시 자동 저장 (세션별) ─────
   useEffect(() => {
-    if (!isHydrated) return;
+    if (!isHydrated || !activeSessionId) return;
+    saveSessionMessages(activeSessionId, messages);
+    // 레거시 호환용
     saveMessages(messages);
-  }, [messages, isHydrated]);
+  }, [messages, isHydrated, activeSessionId]);
 
   useEffect(() => {
-    if (!isHydrated) return;
+    if (!isHydrated || !activeSessionId) return;
+    saveSessionFiles(activeSessionId, files);
     saveFiles(files);
-  }, [files, isHydrated]);
+  }, [files, isHydrated, activeSessionId]);
 
   useEffect(() => {
-    if (!isHydrated) return;
+    if (!isHydrated || !activeSessionId) return;
+    saveSessionProjects(activeSessionId, projects);
     saveProjects(projects);
-  }, [projects, isHydrated]);
+  }, [projects, isHydrated, activeSessionId]);
 
   useEffect(() => {
     if (!isHydrated) return;
     saveActiveProjectId(activeProjectId);
   }, [activeProjectId, isHydrated]);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    saveSessions(sessions);
+  }, [sessions, isHydrated]);
+
+  // 세션 제목 자동 업데이트 (첫 메시지 기반)
+  useEffect(() => {
+    if (!isHydrated || !activeSessionId || messages.length === 0) return;
+    const firstUserMsg = messages.find((m) => m.role === 'user');
+    if (!firstUserMsg) return;
+    const autoTitle = firstUserMsg.content.slice(0, 30) + (firstUserMsg.content.length > 30 ? '...' : '');
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === activeSessionId && s.title === '새 대화'
+          ? { ...s, title: autoTitle, updatedAt: new Date() }
+          : s.id === activeSessionId
+          ? { ...s, updatedAt: new Date() }
+          : s
+      )
+    );
+  }, [messages, isHydrated, activeSessionId]);
 
   const { addToast } = useToast();
 
@@ -533,17 +605,81 @@ export default function Home() {
     }
   }, [files, messages, addToast, handleReview, handleDxfAnalyze]);
 
-  // ───── 새 세션 시작 (상태 초기화) ─────
-  const handleNewSession = useCallback(() => {
-    if (!confirm('현재 대화와 파일을 모두 초기화하시겠습니까?')) return;
+  // ───── 새 세션 생성 ─────
+  const handleCreateSession = useCallback(() => {
+    const newId = crypto.randomUUID();
+    const newSession: Session = {
+      id: newId,
+      title: '새 대화',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setSessions((prev) => [newSession, ...prev]);
+    setActiveSessionId(newId);
+    sessionIdRef.current = newId;
+    saveSessionId(newId);
     setMessages([]);
     setFiles([]);
     setProjects([]);
     setActiveProjectId(null);
-    sessionIdRef.current = crypto.randomUUID();
-    saveSessionId(sessionIdRef.current);
-    addToast('info', '새 세션이 시작되었습니다.');
+    addToast('info', '새 대화가 시작되었습니다.');
   }, [addToast]);
+
+  // ───── 세션 전환 ─────
+  const handleSelectSession = useCallback((sessionId: string) => {
+    if (sessionId === activeSessionId) return;
+    // 현재 세션 데이터 저장은 useEffect에서 자동 처리
+    setActiveSessionId(sessionId);
+    sessionIdRef.current = sessionId;
+    saveSessionId(sessionId);
+    // 새 세션 데이터 로드
+    const sessionMessages = loadSessionMessages<ChatMessage>(sessionId);
+    const sessionFiles = loadSessionFiles<UploadedFile>(sessionId);
+    const sessionProjects = loadSessionProjects<Project>(sessionId);
+    setMessages(sessionMessages);
+    setFiles(sessionFiles);
+    setProjects(sessionProjects);
+    setActiveProjectId(null);
+  }, [activeSessionId]);
+
+  // ───── 세션 삭제 ─────
+  const handleDeleteSession = useCallback((sessionId: string) => {
+    deleteSessionData(sessionId);
+    setSessions((prev) => {
+      const updated = prev.filter((s) => s.id !== sessionId);
+      // 삭제된 세션이 활성 세션이면 다른 세션으로 전환
+      if (sessionId === activeSessionId) {
+        if (updated.length > 0) {
+          const nextId = updated[0].id;
+          setActiveSessionId(nextId);
+          sessionIdRef.current = nextId;
+          saveSessionId(nextId);
+          setMessages(loadSessionMessages<ChatMessage>(nextId));
+          setFiles(loadSessionFiles<UploadedFile>(nextId));
+          setProjects(loadSessionProjects<Project>(nextId));
+        } else {
+          // 모든 세션 삭제 → 새 세션 생성
+          handleCreateSession();
+        }
+      }
+      return updated;
+    });
+    addToast('info', '대화가 삭제되었습니다.');
+  }, [activeSessionId, addToast, handleCreateSession]);
+
+  // ───── 세션 이름 변경 ─────
+  const handleRenameSession = useCallback((sessionId: string, newTitle: string) => {
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === sessionId ? { ...s, title: newTitle, updatedAt: new Date() } : s
+      )
+    );
+  }, []);
+
+  // ───── 새 세션 (ChatPanel 헤더 버튼용 — 기존 호환) ─────
+  const handleNewSession = useCallback(() => {
+    handleCreateSession();
+  }, [handleCreateSession]);
 
   return (
     <ResizableLayout
@@ -564,6 +700,12 @@ export default function Home() {
       onRenameProject={handleRenameProject}
       onMoveFileToProject={handleMoveFileToProject}
       onNewSession={handleNewSession}
+      sessions={sessions}
+      activeSessionId={activeSessionId}
+      onSelectSession={handleSelectSession}
+      onCreateSession={handleCreateSession}
+      onDeleteSession={handleDeleteSession}
+      onRenameSession={handleRenameSession}
     />
   );
 }

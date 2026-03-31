@@ -5,7 +5,7 @@ import { Group, Panel, Separator, usePanelRef } from 'react-resizable-panels';
 import { FilePanel } from '@/components/layout/FilePanel';
 import { ChatPanel } from '@/components/layout/ChatPanel';
 import { LawPanel } from '@/components/layout/LawPanel';
-import type { UploadedFile, ChatMessage, Project } from '@/types';
+import type { UploadedFile, ChatMessage, Project, Session } from '@/types';
 
 interface ResizableLayoutProps {
   files: UploadedFile[];
@@ -25,6 +25,13 @@ interface ResizableLayoutProps {
   onRenameProject: (id: string, name: string) => void;
   onMoveFileToProject: (fileId: string, projectId: string | null) => void;
   onNewSession?: () => void;
+  // 세션 관리
+  sessions: Session[];
+  activeSessionId: string;
+  onSelectSession: (sessionId: string) => void;
+  onCreateSession: () => void;
+  onDeleteSession: (sessionId: string) => void;
+  onRenameSession: (sessionId: string, newTitle: string) => void;
 }
 
 export function ResizableLayout({
@@ -45,6 +52,12 @@ export function ResizableLayout({
   onRenameProject,
   onMoveFileToProject,
   onNewSession,
+  sessions,
+  activeSessionId,
+  onSelectSession,
+  onCreateSession,
+  onDeleteSession,
+  onRenameSession,
 }: ResizableLayoutProps) {
   // 패널 접힘 상태 추적
   const [filePanelCollapsed, setFilePanelCollapsed] = useState(false);
@@ -107,6 +120,12 @@ export function ResizableLayout({
             onDeleteProject={onDeleteProject}
             onRenameProject={onRenameProject}
             onMoveFileToProject={onMoveFileToProject}
+            sessions={sessions}
+            activeSessionId={activeSessionId}
+            onSelectSession={onSelectSession}
+            onCreateSession={onCreateSession}
+            onDeleteSession={onDeleteSession}
+            onRenameSession={onRenameSession}
           />
         </Panel>
         <Separator className="panel-resize-handle" />

@@ -151,6 +151,108 @@ export function loadSessionId(): string | null {
   return safeGet<string | null>('sessionId', null);
 }
 
+// ─── 멀티 세션 관리 ───
+
+/** 세션 목록 저장 */
+export function saveSessions(sessions: any[]): void {
+  const serialized = sessions.map((s: any) => ({
+    ...s,
+    createdAt: s.createdAt instanceof Date ? s.createdAt.toISOString() : s.createdAt,
+    updatedAt: s.updatedAt instanceof Date ? s.updatedAt.toISOString() : s.updatedAt,
+  }));
+  safeSet('sessions', serialized);
+}
+
+/** 세션 목록 로드 */
+export function loadSessions<T>(): T[] {
+  const raw = safeGet<T[]>('sessions', []);
+  return raw.map((s: any) => ({
+    ...s,
+    createdAt: s.createdAt ? new Date(s.createdAt as string) : new Date(),
+    updatedAt: s.updatedAt ? new Date(s.updatedAt as string) : new Date(),
+  })) as T[];
+}
+
+/** 특정 세션의 메시지 저장 */
+export function saveSessionMessages(sessionId: string, messages: any[]): void {
+  const trimmed = messages.map((m) => ({
+    ...m,
+    timestamp: m.timestamp instanceof Date ? m.timestamp.toISOString() : m.timestamp,
+  }));
+  safeSet(`session_messages_${sessionId}`, trimmed);
+}
+
+/** 특정 세션의 메시지 로드 */
+export function loadSessionMessages<T>(sessionId: string): T[] {
+  const raw = safeGet<T[]>(`session_messages_${sessionId}`, []);
+  return raw.map((m: any) => ({
+    ...m,
+    timestamp: m.timestamp ? new Date(m.timestamp as string) : new Date(),
+  })) as T[];
+}
+
+/** 특정 세션의 파일 저장 */
+export function saveSessionFiles(sessionId: string, files: any[]): void {
+  const metas = files.map((f: any) => {
+    if (f.content && typeof f.content === 'string') {
+      saveFileContent(f.id as string, f.content as string);
+    }
+    return {
+      ...f,
+      content: f.content ? '[saved]' : undefined,
+      uploadedAt: f.uploadedAt instanceof Date ? f.uploadedAt.toISOString() : f.uploadedAt,
+    };
+  });
+  safeSet(`session_files_${sessionId}`, metas);
+}
+
+/** 특정 세션의 파일 로드 */
+export function loadSessionFiles<T>(sessionId: string): T[] {
+  const raw = safeGet<T[]>(`session_files_${sessionId}`, []);
+  return raw.map((f: any) => {
+    const content = f.content === '[saved]'
+      ? loadFileContent(f.id as string)
+      : f.content;
+    return {
+      ...f,
+      content: content || undefined,
+      status: content ? 'ready' : 'error',
+      uploadedAt: f.uploadedAt ? new Date(f.uploadedAt as string) : new Date(),
+    };
+  }) as T[];
+}
+
+/** 특정 세션의 프로젝트 저장 */
+export function saveSessionProjects(sessionId: string, projects: any[]): void {
+  const serialized = projects.map((p: any) => ({
+    ...p,
+    createdAt: p.createdAt instanceof Date ? p.createdAt.toISOString() : p.createdAt,
+    updatedAt: p.updatedAt instanceof Date ? p.updatedAt.toISOString() : p.updatedAt,
+  }));
+  safeSet(`session_projects_${sessionId}`, serialized);
+}
+
+/** 특정 세션의 프로젝트 로드 */
+export function loadSessionProjects<T>(sessionId: string): T[] {
+  const raw = safeGet<T[]>(`session_projects_${sessionId}`, []);
+  return raw.map((p: any) => ({
+    ...p,
+    createdAt: p.createdAt ? new Date(p.createdAt as string) : new Date(),
+    updatedAt: p.updatedAt ? new Date(p.updatedAt as string) : new Date(),
+  })) as T[];
+}
+
+/** 특정 세션 데이터 삭제 */
+export function deleteSessionData(sessionId: string): void {
+  try {
+    localStorage.removeItem(`${STORAGE_PREFIX}session_messages_${sessionId}`);
+    localStorage.removeItem(`${STORAGE_PREFIX}session_files_${sessionId}`);
+    localStorage.removeItem(`${STORAGE_PREFIX}session_projects_${sessionId}`);
+  } catch {
+    // 무시
+  }
+}
+
 // ─── 전체 초기화 ───
 
 export function clearAllStorage(): void {
