@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { runDesignReview } from '@/lib/rag/reviewer';
 import { checkPermits } from '@/lib/rag/permit';
 import { isSupabaseConfigured } from '@/lib/rag/index';
+import { supabaseAdmin } from '@/lib/supabase';
 import type { ReviewCard, PermitCard } from '@/types';
 
 /**
@@ -61,6 +62,31 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Review] 검토 완료: ${summary.totalReviewItems}건 (적합 ${summary.pass}, 부적합 ${summary.fail}, 확인필요 ${summary.check})`);
     console.log(`[Review] 인허가: ${summary.totalPermitItems}건 (필수 ${summary.requiredPermits})`);
+
+    // 검토 이력 자동 저장 (비동기, 실패해도 응답에 영향 없음)
+    if (supabaseReady) {
+      // Promise.resolve()로 감싸서 .catch() 사용 가능하게 변환
+      Promise.resolve(
+        supabaseAdmin.from('review_history').insert([{
+          file_name: fileName || '알 수 없음',
+          file_size: fileContent.length,
+          total_items: summary.totalReviewItems,
+          pass_count: summary.pass,
+          fail_count: summary.fail,
+          check_count: summary.check,
+          total_permits: summary.totalPermitItems,
+          required_permits: summary.requiredPermits,
+          review_cards: JSON.stringify(reviewCards),
+          permit_cards: JSON.stringify(permitCards),
+        }])
+      ).then(({ error: histErr }) => {
+        if (histErr) console.warn('[Review] 이력 저장 실패:', histErr.message);
+        else console.log('[Review] 이력 자동 저장 완료');
+      }).catch((err: unknown) => {
+        // 네트워크 오류, Supabase 연결 실패 등 예외 방지
+        console.error('[Review] 이력 저장 중 예외:', err instanceof Error ? err.message : err);
+      });
+    }
 
     return NextResponse.json({
       reviewCards,

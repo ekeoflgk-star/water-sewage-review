@@ -5,7 +5,7 @@
  * - ReviewCard 생성
  */
 
-import { getGeminiModel } from '@/lib/gemini';
+import { getGeminiModel, getGeminiModelJSON } from '@/lib/gemini';
 import { searchKnowledge, formatRAGContext } from '@/lib/rag/index';
 import type { ReviewCard, ReviewCategory, ReviewVerdict } from '@/types';
 
@@ -104,7 +104,7 @@ export async function extractDesignValues(
   const prompt = `다음 설계 문서에서 설계 수치를 JSON 배열로 추출하세요.
 ${categoryGuide}
 
-## 출력 형식 (JSON만 출력, 다른 텍스트 금지):
+아래 JSON 배열 형식으로 출력하세요:
 [
   { "itemName": "항목명", "value": 수치값, "unit": "단위", "location": "문서 내 위치" }
 ]
@@ -113,17 +113,17 @@ ${categoryGuide}
 ${fileContent.slice(0, 15000)}`;
 
   try {
-    const result = await model.generateContent(prompt);
+    // JSON 전용 모델 사용 (마크다운 출력 방지)
+    const jsonModel = getGeminiModelJSON();
+    const result = await jsonModel.generateContent(prompt);
     const text = result.response.text();
 
-    // JSON 추출 (```json ... ``` 블록 또는 직접 배열)
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) return [];
+    // JSON 파싱 (responseMimeType='application/json'이므로 직접 파싱 가능)
+    const parsed = JSON.parse(text);
+    const arr = Array.isArray(parsed) ? parsed : (parsed?.items || parsed?.data || []);
+    if (!Array.isArray(arr) || arr.length === 0) return [];
 
-    const parsed = JSON.parse(jsonMatch[0]);
-    if (!Array.isArray(parsed)) return [];
-
-    return parsed.map((item: { itemName?: string; value?: number | string; unit?: string; location?: string }) => ({
+    return arr.map((item: { itemName?: string; value?: number | string; unit?: string; location?: string }) => ({
       itemName: String(item.itemName || ''),
       value: item.value ?? '',
       unit: String(item.unit || ''),
@@ -269,39 +269,45 @@ async function reviewWithRAG(
 
   const ragContext = formatRAGContext(ragResults);
 
-  // Gemini에 판정 요청
-  const model = getGeminiModel();
-  const prompt = `당신은 상하수도 설계 검토 전문가입니다.
-다음 설계값들을 관련 KDS 기준과 비교하여 판정하세요.
+  // 추가참고문서 vs KDS 기준 분리
+  const refDocResults = ragResults.filter((r) => r.source.includes('[추가참고문서]'));
+  const kdsResults = ragResults.filter((r) => !r.source.includes('[추가참고문서]'));
+  const refDocContext = refDocResults.length > 0
+    ? `\n\n## 추가참고문서 기준 (우선 적용):\n${formatRAGContext(refDocResults)}`
+    : '';
+  const kdsContext = kdsResults.length > 0
+    ? `\n\n## 관련 KDS 기준:\n${formatRAGContext(kdsResults)}`
+    : `\n\n## 관련 KDS 기준:\n${ragContext}`;
 
+  // Gemini JSON 모델로 판정 요청
+  const jsonModel = getGeminiModelJSON();
+  const prompt = `당신은 상하수도 설계 검토 전문가입니다.
+다음 설계값들을 관련 기준과 비교하여 판정하세요.
+${refDocResults.length > 0 ? '\n**중요**: 추가참고문서(발주처 가이드라인·조례 등)가 있는 경우 KDS보다 우선 적용합니다. 추가참고문서에 명시된 기준이 KDS와 다를 경우, 추가참고문서 기준으로 판정하세요.\n' : ''}
 ## 설계값:
 ${designValues.map((dv) => `- ${dv.itemName}: ${dv.value} ${dv.unit} (${dv.location})`).join('\n')}
+${refDocContext}${kdsContext}
 
-## 관련 KDS 기준:
-${ragContext}
-
-## 출력 형식 (JSON 배열만 출력):
+아래 JSON 배열 형식으로 출력하세요:
 [
   {
     "itemName": "항목명",
-    "verdict": "pass|fail|check",
+    "verdict": "pass 또는 fail 또는 check",
     "finding": "검토 의견",
-    "reference": "근거 조문",
+    "reference": "근거 조문 (추가참고문서 또는 KDS)",
     "designValue": "설계값",
     "standardValue": "기준값"
   }
 ]`;
 
   try {
-    const result = await model.generateContent(prompt);
+    const result = await jsonModel.generateContent(prompt);
     const text = result.response.text();
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) return cards;
+    const parsed = JSON.parse(text);
+    const items = Array.isArray(parsed) ? parsed : (parsed?.items || parsed?.data || []);
+    if (!Array.isArray(items) || items.length === 0) return cards;
 
-    const parsed = JSON.parse(jsonMatch[0]);
-    if (!Array.isArray(parsed)) return cards;
-
-    for (const item of parsed) {
+    for (const item of items) {
       cards.push({
         id: crypto.randomUUID(),
         category: 'sewer-pipeline' as ReviewCategory,
@@ -334,54 +340,79 @@ async function geminiDirectReview(
     topK: 5,
   });
 
-  const ragContext = ragResults.length > 0
-    ? `\n\n## 참조 KDS 기준:\n${formatRAGContext(ragResults)}`
+  // 추가참고문서 vs KDS 분리
+  const refDocResults = ragResults.filter((r) => r.source.includes('[추가참고문서]'));
+  const kdsResults = ragResults.filter((r) => !r.source.includes('[추가참고문서]'));
+
+  const refDocContext = refDocResults.length > 0
+    ? `\n\n## 추가참고문서 기준 (우선 적용):\n${formatRAGContext(refDocResults)}`
+    : '';
+  const kdsContext = kdsResults.length > 0
+    ? `\n\n## 참조 KDS 기준:\n${formatRAGContext(kdsResults)}`
     : '';
 
-  const model = getGeminiModel();
+  const jsonModel = getGeminiModelJSON();
   const prompt = `당신은 상하수도 설계 검토 전문가입니다.
 다음 문서를 검토하고 주요 항목별 적합/부적합을 판정하세요.
-${ragContext}
+${refDocResults.length > 0 ? '\n**중요**: 추가참고문서(발주처 가이드라인·조례 등)가 있는 경우 KDS보다 우선 적용합니다. 추가참고문서에 명시된 기준이 KDS와 다를 경우, 추가참고문서 기준으로 판정하세요.\n' : ''}${refDocContext}${kdsContext}
 
 ## 문서 내용:
 ${fileContent.slice(0, 15000)}
 
-## 출력 형식 (JSON 배열만 출력):
+아래 JSON 배열 형식으로 출력하세요:
 [
   {
     "itemName": "검토 항목명",
-    "verdict": "pass|fail|check",
+    "verdict": "pass 또는 fail 또는 check",
     "finding": "상세 검토 의견",
-    "reference": "근거 조문 (KDS 또는 법령)",
+    "reference": "근거 조문 (추가참고문서, KDS 또는 법령)",
     "designValue": "설계값 (있으면)",
     "standardValue": "기준값 (있으면)"
   }
 ]`;
 
-  try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) return [];
+  // 최대 2회 시도
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const result = await jsonModel.generateContent(prompt);
+      const text = result.response.text();
 
-    const parsed = JSON.parse(jsonMatch[0]);
-    if (!Array.isArray(parsed)) return [];
+      // responseMimeType='application/json'이므로 직접 파싱
+      let parsed;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        // 혹시 JSON 파싱 실패 시 기존 방식 fallback
+        const cleaned = text.replace(/```(?:json)?\s*/g, '').replace(/```/g, '').trim();
+        const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
+        if (!jsonMatch) {
+          console.warn(`[Reviewer] 직접 검토 시도 ${attempt + 1}: JSON 추출 실패, 응답 앞 200자:`, text.slice(0, 200));
+          continue;
+        }
+        parsed = JSON.parse(jsonMatch[0]);
+      }
 
-    return parsed.map((item: {
-      itemName?: string; verdict?: string; finding?: string;
-      reference?: string; designValue?: string; standardValue?: string;
-    }) => ({
-      id: crypto.randomUUID(),
-      category: 'sewer-pipeline' as ReviewCategory,
-      itemName: String(item.itemName || '미분류'),
-      verdict: (['pass', 'fail', 'check'].includes(String(item.verdict)) ? item.verdict : 'check') as ReviewVerdict,
-      finding: String(item.finding || ''),
-      reference: String(item.reference || ''),
-      designValue: item.designValue ? String(item.designValue) : undefined,
-      standardValue: item.standardValue ? String(item.standardValue) : undefined,
-    }));
-  } catch (error) {
-    console.error('[Reviewer] 직접 검토 실패:', error);
-    return [];
+      const items = Array.isArray(parsed) ? parsed : (parsed?.items || parsed?.data || []);
+      if (!Array.isArray(items) || items.length === 0) continue;
+
+      return items.map((item: {
+        itemName?: string; verdict?: string; finding?: string;
+        reference?: string; designValue?: string; standardValue?: string;
+      }) => ({
+        id: crypto.randomUUID(),
+        category: 'sewer-pipeline' as ReviewCategory,
+        itemName: String(item.itemName || '미분류'),
+        verdict: (['pass', 'fail', 'check'].includes(String(item.verdict)) ? item.verdict : 'check') as ReviewVerdict,
+        finding: String(item.finding || ''),
+        reference: String(item.reference || ''),
+        designValue: item.designValue ? String(item.designValue) : undefined,
+        standardValue: item.standardValue ? String(item.standardValue) : undefined,
+      }));
+    } catch (error) {
+      console.error(`[Reviewer] 직접 검토 시도 ${attempt + 1} 실패:`, error);
+    }
   }
+
+  console.error('[Reviewer] 직접 검토 2회 모두 실패');
+  return [];
 }

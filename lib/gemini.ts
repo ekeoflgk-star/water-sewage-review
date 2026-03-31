@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // Gemini API 클라이언트 초기화
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-/** Gemini 2.5 Flash 모델 인스턴스 */
+/** Gemini 2.5 Flash 모델 인스턴스 (일반 텍스트 응답용) */
 export function getGeminiModel() {
   return genAI.getGenerativeModel({
     model: 'gemini-2.5-flash',
@@ -11,6 +11,19 @@ export function getGeminiModel() {
       temperature: 0.3,       // 기술 검토용 — 낮은 창의성
       topP: 0.95,
       maxOutputTokens: 8192,
+    },
+  });
+}
+
+/** Gemini 2.5 Flash 모델 인스턴스 (JSON 전용 — 마크다운 출력 방지) */
+export function getGeminiModelJSON() {
+  return genAI.getGenerativeModel({
+    model: 'gemini-2.5-flash',
+    generationConfig: {
+      temperature: 0.3,
+      topP: 0.95,
+      maxOutputTokens: 8192,
+      responseMimeType: 'application/json',  // JSON만 출력 강제
     },
   });
 }

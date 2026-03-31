@@ -7,6 +7,8 @@ import type { UploadedFile } from '@/types';
 
 interface DropZoneProps {
   onFilesAdded: (files: UploadedFile[]) => void;
+  onFileProgress?: (fileId: string, progress: number) => void;
+  onFileStatusChange?: (fileId: string, status: UploadedFile['status'], content?: string, error?: string) => void;
 }
 
 /** 파일 확장자 → 타입 변환 */
@@ -27,7 +29,71 @@ function formatSize(bytes: number): string {
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
-export function DropZone({ onFilesAdded }: DropZoneProps) {
+/** XHR 기반 파일 업로드 (진행률 + 타임아웃 지원) */
+const UPLOAD_TIMEOUT_MS = 120_000; // 2분 (대용량 PDF 파싱 고려)
+
+function uploadWithProgress(
+  file: File,
+  onProgress: (percent: number) => void
+): Promise<{ content: string }> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // 타임아웃 설정 (밀리초)
+    xhr.timeout = UPLOAD_TIMEOUT_MS;
+
+    // 업로드 진행률 (0~90% 구간)
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable) {
+        const percent = Math.round((e.loaded / e.total) * 90);
+        onProgress(percent);
+      }
+    });
+
+    // 업로드 완료 → 파싱 대기 (90%)
+    xhr.upload.addEventListener('load', () => {
+      onProgress(90);
+    });
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const result = JSON.parse(xhr.responseText);
+          onProgress(100);
+          resolve(result);
+        } catch {
+          reject(new Error('응답 파싱 실패'));
+        }
+      } else {
+        let errMsg = `파싱 실패 (${xhr.status})`;
+        try {
+          const errBody = JSON.parse(xhr.responseText);
+          if (errBody.error) errMsg = errBody.error;
+        } catch { /* 무시 */ }
+        reject(new Error(errMsg));
+      }
+    });
+
+    xhr.addEventListener('error', () => {
+      reject(new Error('네트워크 오류 — 인터넷 연결을 확인해주세요.'));
+    });
+
+    xhr.addEventListener('abort', () => {
+      reject(new Error('업로드 취소됨'));
+    });
+
+    xhr.addEventListener('timeout', () => {
+      reject(new Error(`업로드 시간 초과 (${UPLOAD_TIMEOUT_MS / 1000}초) — 파일이 너무 크거나 서버 응답이 없습니다.`));
+    });
+
+    xhr.open('POST', '/api/parse');
+    xhr.send(formData);
+  });
+}
+
+export function DropZone({ onFilesAdded, onFileProgress, onFileStatusChange }: DropZoneProps) {
   const { addToast } = useToast();
 
   const onDrop = useCallback(
@@ -53,42 +119,41 @@ export function DropZone({ onFilesAdded }: DropZoneProps) {
           type: fileType,
           group: null,
           uploadedAt: new Date(),
-          status: 'parsing',
+          status: 'uploading',
+          uploadProgress: 0,
         };
         newFiles.push(uploadedFile);
-
-        // 파일 파싱 API 호출
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-          const response = await fetch('/api/parse', {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (!response.ok) {
-            const errBody = await response.json().catch(() => null);
-            throw new Error(errBody?.error || `파싱 실패 (${response.status})`);
-          }
-
-          const result = await response.json();
-          uploadedFile.content = result.content;
-          uploadedFile.status = 'ready';
-          addToast('success', `파싱 완료: ${file.name}`);
-        } catch (error) {
-          uploadedFile.status = 'error';
-          uploadedFile.errorMessage =
-            error instanceof Error ? error.message : '파싱 오류';
-          addToast('error', `파싱 실패: ${file.name}`);
-        }
       }
 
       if (newFiles.length > 0) {
         onFilesAdded(newFiles);
       }
+
+      // 각 파일을 XHR로 병렬 업로드
+      const uploadPromises = newFiles.map((uploadedFile, i) => {
+        const file = acceptedFiles[i];
+
+        return uploadWithProgress(file, (percent) => {
+          if (percent < 90) {
+            onFileProgress?.(uploadedFile.id, percent);
+          } else if (percent < 100) {
+            onFileStatusChange?.(uploadedFile.id, 'parsing');
+            onFileProgress?.(uploadedFile.id, percent);
+          }
+        }).then((result) => {
+          onFileStatusChange?.(uploadedFile.id, 'ready', result.content);
+          addToast('success', `파싱 완료: ${file.name}`);
+        }).catch((error: unknown) => {
+          const errMsg = error instanceof Error ? error.message : '파싱 오류';
+          onFileStatusChange?.(uploadedFile.id, 'error', undefined, errMsg);
+          addToast('error', `파싱 실패: ${file.name}`);
+        });
+      });
+
+      // 모든 업로드 완료 대기 (개별 실패는 catch에서 처리됨)
+      await Promise.allSettled(uploadPromises);
     },
-    [onFilesAdded, addToast]
+    [onFilesAdded, onFileProgress, onFileStatusChange, addToast]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -111,31 +176,30 @@ export function DropZone({ onFilesAdded }: DropZoneProps) {
     <div
       {...getRootProps()}
       className={`
-        border-2 border-dashed rounded-lg p-4 text-center cursor-pointer
-        transition-all duration-200
+        border-2 border-dashed rounded-xl p-6 text-center cursor-pointer
+        transition-all duration-200 min-h-[120px] flex flex-col items-center justify-center
         ${
           isDragActive
-            ? 'border-blue-500 bg-blue-50 scale-[1.02]'
-            : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50 bg-white'
+            ? 'border-blue-500 bg-blue-50 scale-[1.02] shadow-lg shadow-blue-100'
+            : 'border-slate-300 hover:border-blue-400 hover:bg-blue-50/30 bg-white'
         }
       `}
     >
       <input {...getInputProps()} />
-      <div className={`text-2xl mb-1 transition-transform ${isDragActive ? 'scale-110' : ''}`}>
+      <div className={`text-3xl mb-2 transition-transform duration-200 ${isDragActive ? 'scale-125 animate-bounce' : ''}`}>
         {isDragActive ? '📥' : '📄'}
       </div>
-      <p className="text-xs text-slate-500">
+      <p className="text-sm text-slate-600 font-medium">
         {isDragActive ? (
-          <span className="text-blue-600 font-medium">여기에 놓으세요</span>
+          <span className="text-blue-600">여기에 놓으세요!</span>
         ) : (
           <>
-            파일을 드래그하거나
-            <br />
-            <span className="text-blue-500 underline underline-offset-2">클릭하여 선택</span>
+            파일을 드래그하거나{' '}
+            <span className="text-blue-500 underline underline-offset-2 cursor-pointer">클릭하여 선택</span>
           </>
         )}
       </p>
-      <p className="text-[10px] text-slate-400 mt-1">PDF · DOCX · XLSX · DXF (50MB 이하)</p>
+      <p className="text-xs text-slate-400 mt-1.5">PDF · DOCX · XLSX · DXF (50MB 이하)</p>
     </div>
   );
 }

@@ -1,10 +1,13 @@
 'use client';
 
-import type { ReviewCard as ReviewCardType, ReviewVerdict } from '@/types';
+import type { ReviewCard as ReviewCardType, ReviewVerdict, ReferenceAnnotation } from '@/types';
 import { REVIEW_VERDICT_LABELS } from '@/types';
+import { ReferencePopover } from './ReferencePopover';
 
 interface ReviewCardProps {
   card: ReviewCardType;
+  /** 근거 비교 모드 열기 콜백 */
+  onCompare?: (refs: ReferenceAnnotation[]) => void;
 }
 
 /** 판정별 색상 설정 */
@@ -38,7 +41,7 @@ const VERDICT_STYLES: Record<ReviewVerdict, {
   },
 };
 
-export function ReviewCard({ card }: ReviewCardProps) {
+export function ReviewCard({ card, onCompare }: ReviewCardProps) {
   const style = VERDICT_STYLES[card.verdict];
   const isFail = card.verdict === 'fail';
 
@@ -86,11 +89,12 @@ export function ReviewCard({ card }: ReviewCardProps) {
         </div>
       )}
 
-      {/* 근거 조문 */}
-      <div className="text-[11px] text-slate-500 bg-white/60 rounded px-2 py-1 flex items-center gap-1">
-        <span>📖</span>
-        <span>{card.reference}</span>
-      </div>
+      {/* 근거 조문 — 클릭 가능한 바로가기 */}
+      <ReferencePopover
+        referenceText={card.reference}
+        references={card.references}
+        onCompare={onCompare}
+      />
     </div>
   );
 }

@@ -83,3 +83,70 @@
 .progress-bar-indeterminate {
   animation: progress-indeterminate 1.5s ease-in-out infinite;
 }
+
+/* 패널 리사이즈 핸들 — react-resizable-panels v4 Separator */
+/* data-separator 값: "inactive" | "hover" | "active" */
+
+[role="separator"] {
+  flex-shrink: 0;
+  position: relative;
+  cursor: col-resize;
+  touch-action: none;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+/* 패널에 transition 없음 → 드래그가 부드럽게 */
+[data-panel] {
+  transition: none !important;
+  will-change: flex-grow;
+}
+
+/* 중앙 바 인디케이터 */
+[role="separator"]::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 32px;
+  border-radius: 2px;
+  background-color: #94a3b8;
+  opacity: 0;
+  transition: opacity 0.2s ease, height 0.2s ease, background-color 0.2s ease;
+}
+
+/* 호버 상태 */
+[data-separator="hover"],
+[role="separator"]:hover {
+  background-color: rgba(59, 130, 246, 0.06);
+}
+
+[data-separator="hover"]::after,
+[role="separator"]:hover::after {
+  opacity: 0.7;
+  height: 48px;
+}
+
+/* 드래그(active) 상태 */
+[data-separator="active"] {
+  background-color: rgba(59, 130, 246, 0.12);
+}
+
+[data-separator="active"]::after {
+  opacity: 1;
+  height: 64px;
+  background-color: #3b82f6;
+  transition: opacity 0.1s ease, height 0.1s ease, background-color 0.1s ease;
+}
+
+/* .panel-resize-handle 클래스 (Separator className으로 전달) */
+.panel-resize-handle {
+  width: 8px;
+}
+
+/* 접힌 패널 내부 — 크기 0이 되면 내용 숨김 */
+[data-panel][data-collapsed="true"] {
+  overflow: hidden;
+}

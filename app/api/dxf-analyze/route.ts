@@ -35,9 +35,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 파일 읽기
+    // 파일 읽기 (UTF-8 우선, 실패 시 EUC-KR/CP949 시도)
     const arrayBuffer = await file.arrayBuffer();
-    const content = Buffer.from(arrayBuffer).toString('utf-8');
+    const buffer = Buffer.from(arrayBuffer);
+    let content: string;
+
+    try {
+      // UTF-8 디코딩 시도 (BOM 제거)
+      content = buffer.toString('utf-8').replace(/^\uFEFF/, '');
+      // UTF-8 대체 문자(�)가 많으면 다른 인코딩일 가능성
+      const replacementCount = (content.match(/\uFFFD/g) || []).length;
+      if (replacementCount > content.length * 0.01) {
+        // EUC-KR(CP949) 디코딩 시도
+        const decoder = new TextDecoder('euc-kr', { fatal: false });
+        const eucContent = decoder.decode(buffer);
+        const eucReplacementCount = (eucContent.match(/\uFFFD/g) || []).length;
+        if (eucReplacementCount < replacementCount) {
+          content = eucContent;
+          console.log(`[DXF] ${file.name}: EUC-KR 인코딩 감지 (UTF-8 대체문자 ${replacementCount}개 → EUC-KR ${eucReplacementCount}개)`);
+        }
+      }
+    } catch {
+      // UTF-8 완전 실패 시 latin1 폴백 (바이너리 안전)
+      content = buffer.toString('latin1');
+      console.warn(`[DXF] ${file.name}: UTF-8 디코딩 실패, latin1 폴백 사용`);
+    }
 
     // DXF 파싱
     const parseResult = parseDXF(content);

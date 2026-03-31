@@ -2,24 +2,61 @@
 // 파일 관련 타입
 // ============================================================
 
-/** 파일 그룹 분류 (6종) */
+/** 파일 그룹 분류 (7종) */
 export type FileGroup =
-  | 'design-description'    // 설계설명서
-  | 'hydraulic-calculation' // 수리계산서
+  | 'report'                // 보고서
   | 'drawing'               // 설계도면
-  | 'specification'         // 시방서
   | 'quantity-calculation'  // 수량산출서
-  | 'review-criteria';      // 검토기준문서 (사용자 업로드)
+  | 'design-estimate'       // 설계내역서
+  | 'specification'         // 시방서
+  | 'guideline'             // 추가참고문서 (발주처 가이드라인·조례 등)
+  | 'etc';                  // 기타
 
 /** 파일 그룹 한글 매핑 */
 export const FILE_GROUP_LABELS: Record<FileGroup, string> = {
-  'design-description': '설계설명서',
-  'hydraulic-calculation': '수리계산서',
+  'report': '보고서',
   'drawing': '설계도면',
-  'specification': '시방서',
   'quantity-calculation': '수량산출서',
-  'review-criteria': '검토기준문서',
+  'design-estimate': '설계내역서',
+  'specification': '시방서',
+  'guideline': '📌 추가참고문서',
+  'etc': '기타',
 };
+
+/** 파일 그룹별 설명 (툴팁용) */
+export const FILE_GROUP_DESCRIPTIONS: Record<FileGroup, string> = {
+  'report': '설계설명서, 기본/실시설계보고서 등',
+  'drawing': '평면도, 종단면도, 횡단면도, 구조도 등 (PDF/DXF)',
+  'quantity-calculation': '수량산출서, 물량내역서 등 (주로 XLSX)',
+  'design-estimate': '설계내역서, 원가계산서, 단가표 등 (주로 XLSX)',
+  'specification': '공사시방서, 특별시방서 등',
+  'guideline': '발주처 가이드라인, 조례, 지침 등 — 해당 사업 전용 검토 기준으로 적용',
+  'etc': '기타 참고 문서',
+};
+
+/** 파일 확장자/이름 → 추천 그룹 */
+export function suggestFileGroup(fileName: string): FileGroup | null {
+  const name = fileName.toLowerCase();
+  const ext = name.split('.').pop();
+
+  // 확장자 기반 추천
+  if (ext === 'dxf') return 'drawing';
+  if (ext === 'xlsx' || ext === 'xls') {
+    if (name.includes('수량') || name.includes('물량')) return 'quantity-calculation';
+    if (name.includes('내역') || name.includes('단가') || name.includes('원가')) return 'design-estimate';
+    return null;
+  }
+
+  // 파일명 키워드 기반 추천
+  if (name.includes('보고서') || name.includes('설명서') || name.includes('개요')) return 'report';
+  if (name.includes('도면') || name.includes('평면') || name.includes('종단') || name.includes('횡단')) return 'drawing';
+  if (name.includes('수량') || name.includes('물량')) return 'quantity-calculation';
+  if (name.includes('내역') || name.includes('단가')) return 'design-estimate';
+  if (name.includes('시방')) return 'specification';
+  if (name.includes('가이드') || name.includes('조례') || name.includes('지침')) return 'guideline';
+
+  return null;
+}
 
 /** 업로드된 파일 */
 export interface UploadedFile {
@@ -31,7 +68,12 @@ export interface UploadedFile {
   content?: string;               // 파싱된 텍스트 내용
   uploadedAt: Date;
   status: 'uploading' | 'parsing' | 'ready' | 'error';
+  uploadProgress?: number;     // 업로드 진행률 (0~100)
   errorMessage?: string;
+  /** 임베딩 상태 (추가참고문서용) */
+  embedStatus?: 'none' | 'embedding' | 'embedded' | 'embed-error';
+  embedChunks?: number;          // 임베딩된 청크 수
+  embedProjectId?: string;       // 임베딩된 사업 ID (사업별 격리)
 }
 
 // ============================================================
@@ -89,6 +131,7 @@ export interface ReviewCard {
   reference: string;          // 근거 조문 (예: KDS 61 40 10 §3.2)
   designValue?: string;       // 설계값
   standardValue?: string;     // 기준값
+  references?: ReferenceAnnotation[];  // 복수 근거 (클릭 바로가기용)
 }
 
 // ============================================================
@@ -131,6 +174,36 @@ export interface LawArticle {
   articleNumber: string;      // 조항번호 (예: 제16조)
   content: string;            // 조문 내용
   children?: LawArticle[];    // 하위 법령 (파도타기 탐색용)
+}
+
+// ============================================================
+// 근거 문서 참조 (Phase 4 — 주석 바로가기)
+// ============================================================
+
+/** 검토 근거 참조 정보 */
+export interface ReferenceAnnotation {
+  id: string;
+  source: string;        // 출처명 (예: "KDS 61 40 10", "하수도법 제16조")
+  content: string;       // 근거 텍스트 원문
+  page?: number;         // 페이지 번호
+  section?: string;      // 섹션명
+  similarity?: number;   // 유사도 점수 (RAG 검색 결과)
+  fileId?: string;       // 업로드된 파일 ID (있으면 파일 바로가기 가능)
+}
+
+// ============================================================
+// 프로젝트 폴더 관리 (Phase 4 — 사업별 폴더)
+// ============================================================
+
+/** 사업 프로젝트 (2단계 중첩: 사업 → 하위폴더) */
+export interface Project {
+  id: string;
+  name: string;          // 사업명 (예: "아포 하수관로 정비")
+  parentId?: string;     // 상위 폴더 ID (null이면 최상위)
+  description?: string;
+  fileIds: string[];     // 소속 파일 ID 목록
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // ============================================================

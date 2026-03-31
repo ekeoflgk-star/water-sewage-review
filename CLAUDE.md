@@ -9,8 +9,12 @@
 - **Phase 1 완료**: UI 골격 + 파일 파싱 + Gemini 채팅
 - **Phase 2 완료**: RAG 검토 + 인허가 15종 + 보고서 PDF + 법령 API
 - **Phase 2.5 완료 (92%)**: DXF 인허가 자동 분석 (PDCA Act-1 완료)
-- **KDS 임베딩 대기**: 상수도+하수도 1,436청크, Gemini 쿼터 소진으로 대기 중
-- **빌드**: `npm run build` 성공 확인 (2026-03-25)
+- **Phase 3 완료**: 법령 API + 3단비교(인용+위임조문) + 조례 바로가기
+- **Phase 4 완료**: 리사이즈 패널 + 업로드 진행률 + 하위폴더 + 법령 탭 개선
+- **Phase 4.5 진행중**: 추가참고문서 기능 + 3단비교 UI 확대 + 패널 접힘 표시
+- **KDS 임베딩 대기**: 상수도+하수도 1,436청크 중 401행 완료 (27.9%)
+- **빌드**: Phase 4까지 `npm run build` 성공 확인, Phase 4.5 빌드 미확인
+- **미커밋**: Phase 3.5 ~ 4.5 변경사항 모두 미커밋 (40+ 파일)
 - **OS: Windows** (cp 대신 copy 명령 사용)
 
 ## ⛔ 절대 금지
@@ -38,10 +42,11 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 ## 즉시 해야 할 작업
-1. **KDS 임베딩 실행**: `npx tsx scripts/embed-kds.ts data/kds/` (쿼터: 오후 4시 KST 리셋)
-2. **법제처 API 키**: open.law.go.kr에서 발급 → app/api/law/route.ts OC 값 교체
-3. **미커밋 DXF 기능**: git add + commit 필요
-4. **DXF PDCA 보고서**: `/pdca report dxf-permit-analysis` 실행 가능
+1. **npm run build 확인**: Phase 4.5 변경사항 빌드 확인 필요
+2. **Git commit + push**: 40+ 파일 미커밋 (Phase 3.5~4.5 전체)
+3. **KDS 임베딩 실행**: `npx tsx scripts/embed-kds.ts data/kds/` (쿼터: 오후 4시 KST 리셋)
+4. **review_history 테이블 생성**: Supabase SQL Editor에서 `scripts/create-review-history.sql` 실행
+5. **🔴 서버 버그 5건 수정**: PROJECT_STATUS.md "Phase 4.5 서버/UI 문제점" 참조
 
 ## DXF 인허가 분석 기능 (Phase 2.5)
 - 레이어 접두사 컨벤션: `$`=설계, `#`=인허가, 없음=일반/지적
@@ -56,36 +61,43 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 water-sewage-review/
 ├── CLAUDE.md                        ← 이 파일
 ├── PROJECT_BRIEFING.md              ← 전체 프로젝트 기획서 (필독)
-├── PROJECT_STATUS.md                ← 진행 상황 + 남은 작업 상세 (필독)
+├── PROJECT_STATUS.md                ← 진행 상황 + 남은 작업 상세 (필독★)
 ├── app/
-│   ├── page.tsx                     ✅ 3분할 + 검토 + DXF 분석
+│   ├── page.tsx                     ✅ 3분할 + 리사이즈 + 패널 접힘 + 추가참고문서
 │   └── api/
 │       ├── chat/route.ts            ✅ Gemini 스트리밍
 │       ├── parse/route.ts           ✅ PDF/DOCX/XLSX/DXF 파싱
-│       ├── review/route.ts          ✅ 설계 검토 + 인허가
-│       ├── embed/route.ts           ✅ 사용자 문서 임베딩
-│       ├── law/route.ts             ✅ 법제처 Open API (키 필요)
+│       ├── review/route.ts          ✅ 설계 검토 + 인허가 + 이력 저장
+│       ├── embed/route.ts           ✅ 사용자 문서 임베딩 (사업별 격리)
+│       ├── law/route.ts             ✅ 법제처 Open API
 │       ├── report/route.ts          ✅ PDF 보고서 생성
+│       ├── export-docx/route.ts     ✅ DOCX 내보내기
+│       ├── history/route.ts         ✅ 검토 이력 API
 │       └── dxf-analyze/route.ts     ✅ DXF 인허가 분석
-├── components/chat/
-│   ├── MessageList.tsx              ✅ 마크다운 + 모든 카드 렌더링
-│   ├── DxfAnalysisCard.tsx          ✅ DXF 분석 결과 카드
-│   ├── PermitGuide.tsx              ✅ 설계사 가이드 (DXF 연동)
-│   ├── PermitChecklist.tsx          ✅ 원스톱 체크리스트
-│   └── PermitGantt.tsx              ✅ 간트 차트
+├── components/
+│   ├── layout/
+│   │   ├── ChatPanel.tsx            ✅ 참고 토글 + ReviewHistory
+│   │   ├── FilePanel.tsx            ✅ ProjectManager 통합
+│   │   └── LawPanel.tsx             ✅ "참고 문서" 헤더
+│   ├── chat/
+│   │   ├── MessageList.tsx          ✅ 마크다운 + 모든 카드 렌더링
+│   │   ├── DxfAnalysisCard.tsx      ✅ DXF 분석 결과 + 교차 수치
+│   │   ├── ReviewHistory.tsx        ✅ 검토 이력 패널
+│   │   └── ...                      기타 카드 컴포넌트
+│   ├── file/
+│   │   ├── ProjectManager.tsx       ✅ 2단 중첩 폴더 (→3레벨 미구현)
+│   │   ├── DropZone.tsx             ✅ XHR 업로드 + 진행률
+│   │   └── FileList.tsx             ✅ 임베딩 상태 배지
+│   └── law/
+│       └── LawNavigator.tsx         ✅ 3단비교(인용+위임) + 새 창 팝업
 ├── lib/
-│   ├── parsers/dxf.ts               ✅ DXF 파싱 (dxf-parser)
-│   ├── dxf/
-│   │   ├── layer-classifier.ts      ✅ 레이어 분류
-│   │   ├── cadastral-parser.ts      ✅ 지적 파싱 + 도넛 판별
-│   │   └── permit-mapper.ts         ✅ 통합 분석
-│   └── rag/                         ✅ RAG 검색 + 검토 + 인허가
-├── scripts/embed-kds.ts             ✅ KDS 임베딩 CLI (4초 간격)
-├── data/kds/                        상수도·하수도 설계기준 PDF
+│   ├── dxf/                         ✅ 레이어 분류 + 지적 + 공간분석
+│   └── rag/
+│       └── reviewer.ts              ✅ 추가참고문서 우선 적용
 ├── types/
-│   ├── index.ts                     ✅ 전체 타입
-│   └── dxf.ts                       ✅ DXF 타입 (8개)
-└── docs/                            PDCA 문서 (plan/design/analysis)
+│   ├── index.ts                     ✅ FileGroup 'guideline' + 임베딩 상태
+│   └── dxf.ts                       ✅ DXF + 공간분석 타입
+└── docs/                            PDCA 문서
 ```
 
 ## 검토 판정 기준

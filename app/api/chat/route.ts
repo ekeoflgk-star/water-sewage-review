@@ -86,20 +86,30 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof Error) {
       errorMessage = error.message;
+      // HTTP 상태 코드 추출 (예: "[429 ..." 또는 "status: 429")
+      const httpCodeMatch = errorMessage.match(/\[(\d{3})\s|status[:\s]+(\d{3})/i);
+      const httpCode = httpCodeMatch ? parseInt(httpCodeMatch[1] || httpCodeMatch[2]) : 0;
 
-      // Gemini API 특정 에러 처리
-      if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('API key not valid')) {
+      // Gemini API 특정 에러 처리 (문자열 + HTTP 코드 이중 매칭)
+      const msgLower = errorMessage.toLowerCase();
+      if (msgLower.includes('api_key_invalid') || msgLower.includes('api key not valid') || httpCode === 401) {
         errorMessage = 'API 키가 유효하지 않습니다. .env.local의 GEMINI_API_KEY를 확인하세요.';
         statusCode = 401;
-      } else if (errorMessage.includes('RESOURCE_EXHAUSTED') || errorMessage.includes('429')) {
+      } else if (msgLower.includes('resource_exhausted') || msgLower.includes('quota') || msgLower.includes('rate limit') || httpCode === 429) {
         errorMessage = '무료 사용량 한도에 도달했습니다. 잠시 후 다시 시도하세요. (분당 요청 제한)';
         statusCode = 429;
-      } else if (errorMessage.includes('INVALID_ARGUMENT') || errorMessage.includes('too large')) {
+      } else if (msgLower.includes('invalid_argument') || msgLower.includes('too large') || msgLower.includes('payload') || httpCode === 413) {
         errorMessage = '요청 크기가 너무 큽니다. 더 작은 파일로 시도하거나, 질문을 짧게 해주세요.';
         statusCode = 413;
-      } else if (errorMessage.includes('model') && errorMessage.includes('not found')) {
+      } else if ((msgLower.includes('model') && msgLower.includes('not found')) || httpCode === 404) {
         errorMessage = '모델을 찾을 수 없습니다. Gemini API 설정을 확인하세요.';
         statusCode = 404;
+      } else if (msgLower.includes('permission_denied') || msgLower.includes('forbidden') || httpCode === 403) {
+        errorMessage = 'Gemini API 접근이 거부되었습니다. API 키 권한을 확인하세요.';
+        statusCode = 403;
+      } else if (msgLower.includes('unavailable') || msgLower.includes('internal') || httpCode === 503 || httpCode === 500) {
+        errorMessage = 'Gemini 서버가 일시적으로 응답하지 않습니다. 잠시 후 다시 시도하세요.';
+        statusCode = 503;
       }
     }
 

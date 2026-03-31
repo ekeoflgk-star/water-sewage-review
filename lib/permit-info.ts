@@ -31,6 +31,8 @@ export interface PermitInfo {
   designDeliverables: string[];
   /** 설계 단계에서의 주의사항 */
   designCautions: string[];
+  /** 지자체별 관련 조례 참조 (법제처 검색 키워드) */
+  relatedOrdinances?: string[];
 }
 
 /** 인허가명을 키로 사용하는 상세 정보 맵 */
@@ -73,6 +75,7 @@ export const PERMIT_INFO_MAP: Record<string, PermitInfo> = {
       '설치인가 신청 시 설계도서 완성도가 핵심 — 미비 시 반려',
       '인허가 의제 대상 목록을 사전에 정리하여 설계설명서에 기재',
     ],
+    relatedOrdinances: ['하수도 사용 조례', '하수도 정비 기본계획'],
   },
 
   '공공하수도 사용개시 신고': {
@@ -104,6 +107,7 @@ export const PERMIT_INFO_MAP: Record<string, PermitInfo> = {
       '시운전 기간(통상 3~6개월)을 공사 일정에 반영',
       '계측 장비 설치 위치를 설계에 포함',
     ],
+    relatedOrdinances: ['하수도 사용 조례'],
   },
 
   // ── 키워드 기반 인허가 ──
@@ -145,6 +149,7 @@ export const PERMIT_INFO_MAP: Record<string, PermitInfo> = {
       '굴착 폭이 도로 폭의 1/2 이상이면 교통영향분석 필요 가능성',
       '기존 포장 구조(아스콘 두께 등) 확인하여 복구비 산정',
     ],
+    relatedOrdinances: ['도로 굴착 복구', '도로 점용 조례', '도로관리 조례'],
   },
 
   '하천 점용 허가': {
@@ -184,6 +189,7 @@ export const PERMIT_INFO_MAP: Record<string, PermitInfo> = {
       '하천점용허가 소요기간이 길어(30일+) 설계 초기 협의 필수',
       '홍수기(6~9월) 공사 제한 → 공사 일정 반영',
     ],
+    relatedOrdinances: ['하천 점용 조례', '소하천 정비 조례'],
   },
 
   '농지 전용 허가': {

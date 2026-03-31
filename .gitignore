@@ -37,6 +37,16 @@ yarn-error.log*
 
 # KDS PDF 원본 (용량 큼)
 /data/kds/*.pdf
+/public/kds/*.pdf
+
+# 임베딩 백업 (54MB+)
+/data/backup/
+
+# 임베딩 진행 파일 (로컬 전용)
+.embed-progress.json
+
+# 임시 스크립트
+scripts/check-db.ts
 
 # typescript
 *.tsbuildinfo

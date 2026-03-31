@@ -1,13 +1,15 @@
 'use client';
 
-import type { UploadedFile, FileGroup } from '@/types';
-import { FILE_GROUP_LABELS } from '@/types';
+import type { UploadedFile, FileGroup, Project } from '@/types';
+import { FILE_GROUP_LABELS, FILE_GROUP_DESCRIPTIONS, suggestFileGroup } from '@/types';
 
 interface FileListProps {
   files: UploadedFile[];
   onFileRemove: (fileId: string) => void;
   onGroupChange: (fileId: string, group: FileGroup | null) => void;
   onFileRetry?: (fileId: string) => void;
+  /** 프로젝트 목록 (추가참고문서 사업명 표시용) */
+  projects?: Project[];
 }
 
 /** 파일 크기 포맷 */
@@ -57,11 +59,31 @@ function StatusIndicator({ status }: { status: UploadedFile['status'] }) {
   );
 }
 
-/** 인디터미네이트 프로그레스 바 */
-function IndeterminateProgress() {
+/** 진행률 바 (퍼센트 또는 인디터미네이트) */
+function ProgressBar({ progress, status }: { progress?: number; status: string }) {
+  const hasProgress = typeof progress === 'number' && progress > 0;
+  const isParsing = status === 'parsing';
+
   return (
-    <div className="mt-1.5 h-1 w-full bg-slate-100 rounded-full overflow-hidden">
-      <div className="h-full w-1/4 bg-blue-400 rounded-full progress-bar-indeterminate" />
+    <div className="mt-1.5">
+      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+        {hasProgress ? (
+          <div
+            className={`h-full rounded-full transition-all duration-300 ease-out ${
+              isParsing ? 'bg-amber-400' : progress >= 100 ? 'bg-green-400' : 'bg-blue-400'
+            }`}
+            style={{ width: `${Math.min(progress, 100)}%` }}
+          />
+        ) : (
+          <div className="h-full w-1/4 bg-blue-400 rounded-full progress-bar-indeterminate" />
+        )}
+      </div>
+      {hasProgress && (
+        <p className="text-[10px] text-slate-400 mt-0.5 text-right">
+          {isParsing ? '파싱 중...' : `${Math.round(progress)}%`}
+          {status === 'uploading' && progress < 90 && ' 업로드 중'}
+        </p>
+      )}
     </div>
   );
 }
@@ -71,6 +93,7 @@ export function FileList({
   onFileRemove,
   onGroupChange,
   onFileRetry,
+  projects,
 }: FileListProps) {
   if (files.length === 0) {
     return (
@@ -116,30 +139,84 @@ export function FileList({
             </button>
           </div>
 
-          {/* 파싱 중 프로그레스 바 */}
+          {/* 업로드/파싱 진행률 바 */}
           {(file.status === 'uploading' || file.status === 'parsing') && (
-            <IndeterminateProgress />
+            <ProgressBar progress={file.uploadProgress} status={file.status} />
           )}
 
-          {/* 그룹 분류 선택 (준비 완료 시에만) */}
-          {file.status === 'ready' && (
-            <select
-              value={file.group || ''}
-              onChange={(e) =>
-                onGroupChange(
-                  file.id,
-                  (e.target.value as FileGroup) || null
-                )
-              }
-              className="mt-2 w-full text-xs border border-slate-200 rounded px-2 py-1 text-slate-600 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-400"
-            >
-              <option value="">그룹 선택...</option>
-              {Object.entries(FILE_GROUP_LABELS).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
+          {/* 그룹 분류 선택 (준비 완료 시에만) (#4 — 툴팁 + 자동 추천) */}
+          {file.status === 'ready' && (() => {
+            const suggested = suggestFileGroup(file.name);
+            return (
+              <div className="mt-2">
+                {/* 자동 추천 배지 */}
+                {suggested && !file.group && (
+                  <button
+                    onClick={() => onGroupChange(file.id, suggested)}
+                    className="mb-1 w-full text-xs text-left px-2 py-1 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 transition-colors flex items-center gap-1.5"
+                    title={`파일명 기반 추천: ${FILE_GROUP_DESCRIPTIONS[suggested]}`}
+                  >
+                    <span className="text-blue-500">💡</span>
+                    <span className="text-blue-600">추천: <strong>{FILE_GROUP_LABELS[suggested]}</strong></span>
+                    <span className="text-blue-400 ml-auto text-[10px]">클릭하여 적용</span>
+                  </button>
+                )}
+                <select
+                  value={file.group || ''}
+                  onChange={(e) =>
+                    onGroupChange(
+                      file.id,
+                      (e.target.value as FileGroup) || null
+                    )
+                  }
+                  className="w-full text-xs border border-slate-200 rounded px-2 py-1 text-slate-600 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                  title="문서 유형을 선택하면 검토 시 참고됩니다"
+                >
+                  <option value="">그룹 선택...</option>
+                  {Object.entries(FILE_GROUP_LABELS).map(([key, label]) => (
+                    <option key={key} value={key} title={FILE_GROUP_DESCRIPTIONS[key as FileGroup]}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            );
+          })()}
+
+          {/* 추가참고문서 임베딩 상태 표시 */}
+          {file.group === 'guideline' && file.status === 'ready' && (
+            <div className="mt-1.5">
+              {file.embedStatus === 'embedding' && (
+                <div className="flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 rounded px-2 py-1">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                  검토 기준 임베딩 중...
+                </div>
+              )}
+              {file.embedStatus === 'embedded' && (() => {
+                const projName = projects?.find((p) => p.id === file.embedProjectId)?.name;
+                return (
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 rounded px-2 py-1">
+                    <span>📌</span>
+                    <span>
+                      검토 기준 적용됨 ({file.embedChunks}개 청크)
+                      {projName && <span className="text-emerald-500 ml-1">— 📂 {projName} 전용</span>}
+                    </span>
+                  </div>
+                );
+              })()}
+              {file.embedStatus === 'embed-error' && (
+                <div className="flex items-center gap-1.5 text-xs text-red-600 bg-red-50 rounded px-2 py-1">
+                  <span>⚠️</span>
+                  임베딩 실패
+                </div>
+              )}
+              {(!file.embedStatus || file.embedStatus === 'none') && (
+                <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-50 rounded px-2 py-1">
+                  <span>📌</span>
+                  추가참고문서 — 그룹 저장 시 자동 임베딩
+                </div>
+              )}
+            </div>
           )}
 
           {/* 에러 메시지 + 재시도 */}

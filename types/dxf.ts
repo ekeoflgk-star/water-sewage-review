@@ -43,6 +43,16 @@ export interface CadParcel {
   matched: boolean;        // 텍스트 매칭 성공 여부
 }
 
+/** 공간 교차 분석 결과 */
+export interface SpatialIntersectionResult {
+  designLayer: string;       // 예: "$관로-오수"
+  permitLayer: string;       // 예: "#도로구역"
+  permitName: string;        // 예: "도로 점용 허가"
+  intersectionLength: number; // 설계 라인이 인허가 구역 내부를 통과하는 연장(m)
+  intersectionArea: number;   // 설계 폴리곤이 인허가 구역과 겹치는 면적(m²)
+  designEntityCount: number;  // 교차하는 설계 엔티티 수
+}
+
 /** 인허가 분석 결과 항목 */
 export interface PermitAnalysisItem {
   permitName: string;
@@ -52,6 +62,12 @@ export interface PermitAnalysisItem {
   parcelInfo?: {
     lotNumber: string;
     landCategory: string;
+  };
+  /** 공간 교차 수치 (Phase B) */
+  intersection?: {
+    length: number;          // 교차 연장 (m)
+    area: number;            // 교차 면적 (m²)
+    designLayers: string[];  // 교차하는 설계 레이어 목록
   };
 }
 
@@ -67,6 +83,7 @@ export interface DxfAnalysisResult {
   };
   parcels: CadParcel[];
   permits: PermitAnalysisItem[];
+  spatialResults?: SpatialIntersectionResult[];
   warnings: string[];
   analyzedAt: string;
 }
