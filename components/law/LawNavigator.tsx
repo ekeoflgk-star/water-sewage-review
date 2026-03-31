@@ -292,23 +292,50 @@ const QUICK_LAWS = [
 // ============================================================
 const SPECIFICATIONS = [
   // ── 상수도 직접 관련 ──
-  // query: 법제처에서 검색 가능한 관련 법령명으로 매핑
-  { label: '상수도공사 표준시방서', description: '취수·정수·송배수·급수 시설 시공', query: '수도시설의 청소 및 위생관리 등에 관한 규칙', category: '상수도' },
-  { label: '수도용 자재·제품 시방서', description: '수도관·밸브·이음관 자재 기준', query: '수도용 자재와 제품의 위생안전기준 인증 등에 관한 규칙', category: '상수도' },
-  { label: '상수관로 갱생공사 시방서', description: '노후관 세척·라이닝·갱생 기준', query: '수도법', category: '상수도' },
+  { label: '상수도공사 표준시방서', description: '취수·정수·송배수·급수 시설 시공', category: '상수도',
+    relatedLaws: ['수도법', '수도법 시행령', '수도시설의 청소 및 위생관리 등에 관한 규칙'],
+    publisher: '환경부', note: '상수도 시설 설치·유지관리 시공기준' },
+  { label: '수도용 자재·제품 시방서', description: '수도관·밸브·이음관 자재 기준', category: '상수도',
+    relatedLaws: ['수도법', '수도용 자재와 제품의 위생안전기준 인증 등에 관한 규칙'],
+    publisher: '환경부', note: '수도 자재 품질·위생안전 기준' },
+  { label: '상수관로 갱생공사 시방서', description: '노후관 세척·라이닝·갱생 기준', category: '상수도',
+    relatedLaws: ['수도법', '수도법 시행규칙'],
+    publisher: '환경부', note: '노후 상수관 갱생 공법 시공기준' },
   // ── 하수도 직접 관련 ──
-  { label: '하수도공사 표준시방서', description: '하수관로·맨홀·우수시설 시공', query: '하수도법', category: '하수도' },
-  { label: '하수관로 비굴착공사 시방서', description: '추진·관삽입·반전경화 비굴착 공법', query: '하수도법 시행령', category: '하수도' },
-  { label: '하수관로 정비사업 시방서', description: '하수관로 조사·진단·보수·보강', query: '하수도법 시행규칙', category: '하수도' },
-  { label: '하수처리시설 표준시방서', description: '하수처리장·슬러지처리 시공', query: '하수도법', category: '하수도' },
-  { label: '물재이용시설 시방서', description: '중수도·빗물이용·하수재이용 시설', query: '물의 재이용 촉진 및 지원에 관한 법률', category: '하수도' },
+  { label: '하수도공사 표준시방서', description: '하수관로·맨홀·우수시설 시공', category: '하수도',
+    relatedLaws: ['하수도법', '하수도법 시행령', '하수도법 시행규칙'],
+    publisher: '환경부', note: '하수관로·맨홀 시공 표준' },
+  { label: '하수관로 비굴착공사 시방서', description: '추진·관삽입·반전경화 비굴착 공법', category: '하수도',
+    relatedLaws: ['하수도법', '하수도법 시행령'],
+    publisher: '환경부', note: '비굴착 보수·보강 공법 기준' },
+  { label: '하수관로 정비사업 시방서', description: '하수관로 조사·진단·보수·보강', category: '하수도',
+    relatedLaws: ['하수도법', '하수도법 시행규칙'],
+    publisher: '환경부', note: '하수관로 정비 조사·진단 기준' },
+  { label: '하수처리시설 표준시방서', description: '하수처리장·슬러지처리 시공', category: '하수도',
+    relatedLaws: ['하수도법', '물환경보전법'],
+    publisher: '환경부', note: '하수처리장 시설 시공기준' },
+  { label: '물재이용시설 시방서', description: '중수도·빗물이용·하수재이용 시설', category: '하수도',
+    relatedLaws: ['물의 재이용 촉진 및 지원에 관한 법률'],
+    publisher: '환경부', note: '중수도·빗물이용 시설 설치기준' },
   // ── 상하수도 공통 (토목·구조) ──
-  { label: '토목공사 표준시방서', description: '토공·기초·포장 등 토목 일반', query: '건설기술 진흥법', category: '공통' },
-  { label: '콘크리트 표준시방서', description: '콘크리트 배합·타설·양생 기준', query: '건설기술 진흥법 시행령', category: '공통' },
-  { label: '건설공사 표준시방서', description: '건설공사 일반 시공 기준', query: '건설기술 진흥법', category: '공통' },
-  { label: '도로공사 표준시방서', description: '도로 복구·포장·부대시설', query: '도로법', category: '공통' },
-  { label: '터널공사 표준시방서', description: '개착·추진 터널 (관로 횡단)', query: '시설물의 안전 및 유지관리에 관한 특별법', category: '공통' },
-  { label: '가시설 안전기준 시방서', description: '흙막이·가물막이·가설구조물', query: '산업안전보건기준에 관한 규칙', category: '공통' },
+  { label: '토목공사 표준시방서', description: '토공·기초·포장 등 토목 일반', category: '공통',
+    relatedLaws: ['건설기술 진흥법', '건설기술 진흥법 시행령'],
+    publisher: '국토교통부', note: '토목 일반 시공 표준' },
+  { label: '콘크리트 표준시방서', description: '콘크리트 배합·타설·양생 기준', category: '공통',
+    relatedLaws: ['건설기술 진흥법'],
+    publisher: '국토교통부', note: '콘크리트 구조물 시공 표준' },
+  { label: '건설공사 표준시방서', description: '건설공사 일반 시공 기준', category: '공통',
+    relatedLaws: ['건설기술 진흥법', '건설산업기본법'],
+    publisher: '국토교통부', note: '건설공사 시공 일반 기준' },
+  { label: '도로공사 표준시방서', description: '도로 복구·포장·부대시설', category: '공통',
+    relatedLaws: ['도로법', '도로법 시행령'],
+    publisher: '국토교통부', note: '도로 시공·복구 기준' },
+  { label: '터널공사 표준시방서', description: '개착·추진 터널 (관로 횡단)', category: '공통',
+    relatedLaws: ['시설물의 안전 및 유지관리에 관한 특별법'],
+    publisher: '국토교통부', note: '터널 시공·안전 기준' },
+  { label: '가시설 안전기준 시방서', description: '흙막이·가물막이·가설구조물', category: '공통',
+    relatedLaws: ['산업안전보건법', '산업안전보건기준에 관한 규칙'],
+    publisher: '고용노동부', note: '가시설 안전 설치·해체 기준' },
 ];
 
 // ============================================================
@@ -353,6 +380,16 @@ export function LawNavigator() {
 
   // 검색 출처 추적 (어느 탭에서 검색을 시작했는지)
   const [searchOriginTab, setSearchOriginTab] = useState<PanelTab>('law');
+
+  // 시방서 상세 뷰
+  const [selectedSpec, setSelectedSpec] = useState<typeof SPECIFICATIONS[0] | null>(null);
+
+  // KDS 검색 결과
+  const [kdsResults, setKdsResults] = useState<Array<{ id: string; source: string; section: string | null; page: number | null; content: string }>>([]);
+  const [kdsSearchQuery, setKdsSearchQuery] = useState('');
+  const [isKdsLoading, setIsKdsLoading] = useState(false);
+  const [kdsHasSearched, setKdsHasSearched] = useState(false);
+  const [kdsError, setKdsError] = useState<string | null>(null);
 
   // 검색 입력 ref
   const inputRef = useRef<HTMLInputElement>(null);
@@ -543,13 +580,52 @@ export function LawNavigator() {
   }, []);
 
   // --------------------------------------------------------
-  // 시방서/설계기준 탭에서 검색 시작
+  // 시방서 → 관련 법령 검색 (법령 탭으로 전환)
+  // --------------------------------------------------------
+  const handleSpecLawSearch = useCallback((lawName: string) => {
+    setActiveTab('law');
+    setSearchOriginTab('law');
+    setSearchQuery(lawName);
+    handleSearch(lawName);
+  }, [handleSearch]);
+
+  // --------------------------------------------------------
+  // KDS 설계기준 검색 (knowledge_base 텍스트 검색)
+  // --------------------------------------------------------
+  const handleKdsSearch = useCallback(async (query: string, source?: string) => {
+    setIsKdsLoading(true);
+    setKdsSearchQuery(query);
+    setKdsError(null);
+    try {
+      const params = new URLSearchParams();
+      if (query) params.set('q', query);
+      if (source) params.set('source', source);
+      params.set('limit', '20');
+      const res = await fetch(`/api/kds-search?${params.toString()}`);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `KDS 검색 실패 (${res.status})`);
+      }
+      const data = await res.json();
+      setKdsResults(data.results || []);
+      setKdsHasSearched(true);
+    } catch (err) {
+      console.error('[KDS] 검색 오류:', err);
+      setKdsResults([]);
+      setKdsHasSearched(true);
+      setKdsError(err instanceof Error ? err.message : 'KDS 검색 오류');
+    } finally {
+      setIsKdsLoading(false);
+    }
+  }, []);
+
+  // --------------------------------------------------------
+  // 시방서/설계기준 탭에서 검색 시작 (법령 탭 전용)
   // --------------------------------------------------------
   const handleTabSearch = useCallback((query: string, fromTab: PanelTab) => {
     setSearchOriginTab(fromTab);
     setSearchQuery(query);
     handleSearch(query);
-    // 탭은 그대로 유지! 법령 탭으로 전환하지 않음
   }, [handleSearch]);
 
   // --------------------------------------------------------
@@ -590,6 +666,11 @@ export function LawNavigator() {
     setLawDetail(null);
     setSelectedArticle(null);
     setThreeWayResult(null);
+    setSelectedSpec(null);
+    setKdsResults([]);
+    setKdsSearchQuery('');
+    setKdsHasSearched(false);
+    setKdsError(null);
     setError(null);
   };
 
@@ -973,12 +1054,11 @@ export function LawNavigator() {
         })}
       </div>
 
-      {/* 시방서 탭 — 목록 (검색 전) */}
-      {activeTab === 'specification' && isAtTabHome && (
+      {/* 시방서 탭 — 목록 */}
+      {activeTab === 'specification' && !selectedSpec && (
         <div className="flex-1 overflow-y-auto p-3">
           <p className="text-xs font-medium text-slate-600 mb-2">상하수도 관련 시방서</p>
-          <p className="text-[10px] text-slate-400 mb-3">클릭하면 관련 법령을 법제처에서 검색합니다.</p>
-          {/* 카테고리별 그룹 */}
+          <p className="text-[10px] text-slate-400 mb-3">클릭하면 시방서 정보와 관련 법령을 확인할 수 있습니다.</p>
           {(['상수도', '하수도', '공통'] as const).map((cat) => {
             const items = SPECIFICATIONS.filter((s) => s.category === cat);
             const colorMap = {
@@ -999,13 +1079,12 @@ export function LawNavigator() {
                   {items.map((spec) => (
                     <button
                       key={spec.label}
-                      onClick={() => handleTabSearch(spec.query, 'specification')}
+                      onClick={() => setSelectedSpec(spec)}
                       className={`w-full text-left px-3 py-2 bg-white border ${c.border} rounded-lg
                                  ${c.hover} transition-colors group`}
                     >
                       <p className={`text-[11px] font-medium text-slate-700 group-hover:${c.text}`}>{spec.label}</p>
                       <p className="text-[10px] text-slate-400 mt-0.5">{spec.description}</p>
-                      <p className="text-[9px] text-blue-400 mt-0.5">→ {spec.query}</p>
                     </button>
                   ))}
                 </div>
@@ -1015,38 +1094,156 @@ export function LawNavigator() {
         </div>
       )}
 
-      {/* 시방서 탭 — 검색결과/조문 (검색 후) */}
-      {activeTab === 'specification' && !isAtTabHome && renderSearchAndDetail()}
-
-      {/* 설계기준 탭 — 목록 (검색 전) */}
-      {activeTab === 'design-standard' && isAtTabHome && (
+      {/* 시방서 탭 — 상세 뷰 */}
+      {activeTab === 'specification' && selectedSpec && (
         <div className="flex-1 overflow-y-auto p-3">
-          <p className="text-xs font-medium text-slate-600 mb-3">KDS 설계기준 (국가건설기준)</p>
+          <button
+            onClick={() => setSelectedSpec(null)}
+            className="text-xs text-blue-600 hover:text-blue-800 mb-3 flex items-center gap-1"
+          >
+            ← 시방서 목록
+          </button>
+          <div className="bg-white border border-slate-200 rounded-lg p-3 mb-3">
+            <p className="text-sm font-semibold text-slate-800">{selectedSpec.label}</p>
+            <p className="text-[11px] text-slate-500 mt-1">{selectedSpec.description}</p>
+            <div className="mt-2 flex gap-2 flex-wrap">
+              <span className="text-[9px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                {selectedSpec.category}
+              </span>
+              <span className="text-[9px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                {selectedSpec.publisher}
+              </span>
+            </div>
+            {selectedSpec.note && (
+              <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">{selectedSpec.note}</p>
+            )}
+          </div>
+
+          {/* 관련 법령 */}
+          <div className="mb-3">
+            <p className="text-[11px] font-semibold text-slate-600 mb-2">관련 법령</p>
+            <div className="space-y-1">
+              {selectedSpec.relatedLaws.map((law) => (
+                <button
+                  key={law}
+                  onClick={() => handleSpecLawSearch(law)}
+                  className="w-full text-left px-3 py-2 bg-blue-50/50 border border-blue-100 rounded-lg
+                             hover:bg-blue-100/60 hover:border-blue-200 transition-colors text-[11px] text-blue-700"
+                >
+                  ⚖️ {law}
+                  <span className="text-[9px] text-blue-400 ml-1">→ 법제처 검색</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5">
+            <p className="text-[10px] text-amber-700 leading-relaxed">
+              시방서 원문은 국가건설기준센터(KCSC) 또는 각 소관부처에서 확인할 수 있습니다.
+              위 관련 법령을 클릭하면 법제처에서 해당 법령을 검색합니다.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 설계기준 탭 — 목록 */}
+      {activeTab === 'design-standard' && !kdsHasSearched && !isKdsLoading && (
+        <div className="flex-1 overflow-y-auto p-3">
+          <p className="text-xs font-medium text-slate-600 mb-1">KDS 설계기준 (국가건설기준)</p>
+          <p className="text-[10px] text-slate-400 mb-3">클릭하면 임베딩된 KDS 설계기준 내용을 검색합니다.</p>
           <div className="space-y-2">
-            {DESIGN_STANDARDS.map((std) => (
-              <button
-                key={std.label}
-                onClick={() => handleTabSearch(std.query, 'design-standard')}
-                className="w-full text-left px-3 py-2.5 bg-white border border-slate-200 rounded-lg
-                           hover:border-green-300 hover:bg-green-50/50 transition-colors group"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-mono shrink-0">
-                    {std.label}
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-1">{std.description}</p>
-              </button>
-            ))}
+            {DESIGN_STANDARDS.map((std) => {
+              // KDS 번호에서 소스 추출 (예: "KDS 61 40 10" → "하수도" or "상수도")
+              const sourceKey = std.label.startsWith('KDS 61 4') ? '하수도'
+                : std.label.startsWith('KDS 61 3') ? '상수도' : '';
+              // 검색 키워드 추출 (description에서)
+              const searchKeyword = std.description.replace(/설계기준/g, '').replace(/시설/g, '').trim().split(' ')[0];
+              return (
+                <button
+                  key={std.label}
+                  onClick={() => handleKdsSearch(searchKeyword, sourceKey ? `${sourceKey}설계기준` : '')}
+                  className="w-full text-left px-3 py-2.5 bg-white border border-slate-200 rounded-lg
+                             hover:border-green-300 hover:bg-green-50/50 transition-colors group"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-mono shrink-0">
+                      {std.label}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1">{std.description}</p>
+                </button>
+              );
+            })}
           </div>
           <p className="mt-4 text-[10px] text-slate-400 leading-relaxed">
-            설계기준을 클릭하면 법제처에서 관련 기준을 검색합니다.
+            KDS 설계기준은 Supabase에 임베딩된 데이터에서 검색됩니다 (1,436청크).
           </p>
         </div>
       )}
 
-      {/* 설계기준 탭 — 검색결과/조문 (검색 후) */}
-      {activeTab === 'design-standard' && !isAtTabHome && renderSearchAndDetail()}
+      {/* 설계기준 탭 — 로딩 */}
+      {activeTab === 'design-standard' && isKdsLoading && (
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center">
+            <div className="animate-spin text-2xl mb-2">🔍</div>
+            <p className="text-xs text-slate-500">KDS 설계기준 검색 중...</p>
+          </div>
+        </div>
+      )}
+
+      {/* 설계기준 탭 — 검색 결과 */}
+      {activeTab === 'design-standard' && kdsHasSearched && !isKdsLoading && (
+        <div className="flex-1 overflow-y-auto p-3">
+          <button
+            onClick={() => { setKdsResults([]); setKdsSearchQuery(''); setKdsHasSearched(false); setKdsError(null); }}
+            className="text-xs text-blue-600 hover:text-blue-800 mb-2 flex items-center gap-1"
+          >
+            ← 설계기준 목록
+          </button>
+
+          {/* 에러 표시 */}
+          {kdsError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
+              <p className="text-[11px] text-red-600">{kdsError}</p>
+              <p className="text-[10px] text-red-400 mt-1">Supabase 연결을 확인해주세요.</p>
+            </div>
+          )}
+
+          {/* 0건 결과 */}
+          {!kdsError && kdsResults.length === 0 && (
+            <div className="text-center py-8">
+              <div className="text-2xl mb-2 opacity-30">🔍</div>
+              <p className="text-xs text-slate-500">&ldquo;{kdsSearchQuery}&rdquo;에 대한 결과가 없습니다.</p>
+            </div>
+          )}
+
+          {kdsResults.length > 0 && (
+            <p className="text-[10px] text-slate-400 mb-3">
+              &ldquo;{kdsSearchQuery}&rdquo; 검색 결과 {kdsResults.length}건
+            </p>
+          )}
+          <div className="space-y-2">
+            {kdsResults.map((item, idx) => (
+              <div key={item.id || idx} className="bg-white border border-slate-200 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-mono shrink-0">
+                    {item.source?.replace('_', ' ')}
+                  </span>
+                  {item.section && (
+                    <span className="text-[9px] text-slate-400">{item.section}</span>
+                  )}
+                  {item.page && (
+                    <span className="text-[9px] text-slate-400">p.{item.page}</span>
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-700 leading-relaxed whitespace-pre-wrap">
+                  {item.content.length > 500 ? item.content.slice(0, 500) + '...' : item.content}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 법령 탭 — 초기 상태 (바로가기) */}
       {activeTab === 'law' && isAtTabHome && (
