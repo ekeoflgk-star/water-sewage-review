@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-31T09:35:10.794Z",
+  "lastUpdated": "2026-03-31T06:41:23.438Z",
   "activeFeatures": [
     "dxf-permit-analysis",
     "phase2-rag-review",
@@ -19,8 +19,7 @@
     "file",
     "dxf-analyze",
     "history",
-    "export-docx",
-    "kind-rosalind"
+    "export-docx"
   ],
   "primaryFeature": "dxf-permit-analysis",
   "features": {
@@ -60,9 +59,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-24T06:53:48.803Z",
-        "lastUpdated": "2026-03-31T04:19:30.670Z"
+        "lastUpdated": "2026-03-31T06:40:41.031Z"
       },
-      "lastFile": "D:/우종현/100.AI실무 아이템/01-2.설계 품질 검토/water-sewage-review/lib/storage.ts"
+      "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\next.config.js"
     },
     "rag": {
       "phase": "do",
@@ -125,9 +124,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-24T07:35:28.042Z",
-        "lastUpdated": "2026-03-31T04:17:02.235Z"
+        "lastUpdated": "2026-03-31T06:40:32.334Z"
       },
-      "lastFile": "D:/우종현/100.AI실무 아이템/01-2.설계 품질 검토/water-sewage-review/components/chat/MessageList.tsx"
+      "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\components\\chat\\MessageList.tsx"
     },
     "law": {
       "phase": "do",
@@ -151,9 +150,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-24T10:44:19.951Z",
-        "lastUpdated": "2026-03-31T04:17:28.472Z"
+        "lastUpdated": "2026-03-31T06:39:37.843Z"
       },
-      "lastFile": "D:/우종현/100.AI실무 아이템/01-2.설계 품질 검토/water-sewage-review/components/layout/LawPanel.tsx"
+      "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\components\\layout\\ChatPanel.tsx"
     },
     "report": {
       "phase": "do",
@@ -177,9 +176,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-25T02:08:00.571Z",
-        "lastUpdated": "2026-03-25T02:13:52.720Z"
+        "lastUpdated": "2026-03-31T06:41:23.438Z"
       },
-      "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\lib\\parsers\\dxf.ts"
+      "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\lib\\parsers\\client.ts"
     },
     "dxf": {
       "phase": "do",
@@ -216,9 +215,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-03-25T02:09:53.769Z",
-        "lastUpdated": "2026-03-31T01:25:25.653Z"
+        "lastUpdated": "2026-03-31T06:38:32.037Z"
       },
-      "lastFile": "D:/우종현/100.AI실무 아이템/01-2.설계 품질 검토/water-sewage-review/components/file/DropZone.tsx"
+      "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\components\\file\\DropZone.tsx"
     },
     "dxf-analyze": {
       "phase": "do",
@@ -258,19 +257,6 @@
         "lastUpdated": "2026-03-25T07:03:42.712Z"
       },
       "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\app\\api\\export-docx\\route.ts"
-    },
-    "kind-rosalind": {
-      "phase": "do",
-      "phaseNumber": 3,
-      "matchRate": null,
-      "iterationCount": 0,
-      "requirements": [],
-      "documents": {},
-      "timestamps": {
-        "started": "2026-03-31T09:35:10.794Z",
-        "lastUpdated": "2026-03-31T09:35:10.794Z"
-      },
-      "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\.claude\\worktrees\\kind-rosalind\\lib\\supabase.ts"
     }
   },
   "pipeline": {
@@ -287,7 +273,7 @@
   "session": {
     "startedAt": "2026-03-24T06:42:53.758Z",
     "onboardingCompleted": true,
-    "lastActivity": "2026-03-31T09:35:10.794Z"
+    "lastActivity": "2026-03-31T06:41:23.438Z"
   },
   "history": [
     {
@@ -2229,8 +2215,68 @@
       "action": "updated"
     },
     {
-      "timestamp": "2026-03-31T09:35:10.794Z",
-      "feature": "kind-rosalind",
+      "timestamp": "2026-03-31T06:38:08.446Z",
+      "feature": "parsers",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-31T06:38:15.680Z",
+      "feature": "file",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-31T06:38:32.037Z",
+      "feature": "file",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-31T06:38:57.735Z",
+      "feature": "chat",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-31T06:39:37.843Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-31T06:39:55.986Z",
+      "feature": "chat",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-31T06:40:09.602Z",
+      "feature": "chat",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-31T06:40:26.345Z",
+      "feature": "chat",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-31T06:40:32.334Z",
+      "feature": "chat",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-31T06:40:41.031Z",
+      "feature": "water-sewage-review",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-31T06:41:23.438Z",
+      "feature": "parsers",
       "phase": "do",
       "action": "updated"
     }
