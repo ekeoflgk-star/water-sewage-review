@@ -1057,8 +1057,8 @@ export function LawNavigator() {
       {/* 시방서 탭 — 목록 */}
       {activeTab === 'specification' && !selectedSpec && (
         <div className="flex-1 overflow-y-auto p-3">
-          <p className="text-xs font-medium text-slate-600 mb-2">상하수도 관련 시방서</p>
-          <p className="text-[10px] text-slate-400 mb-3">클릭하면 시방서 정보와 관련 법령을 확인할 수 있습니다.</p>
+          <p className="text-sm font-bold text-slate-700 mb-1">상하수도 관련 시방서</p>
+          <p className="text-xs text-slate-400 mb-4">클릭하면 시방서 정보와 관련 법령을 확인할 수 있습니다.</p>
           {(['상수도', '하수도', '공통'] as const).map((cat) => {
             const items = SPECIFICATIONS.filter((s) => s.category === cat);
             const colorMap = {
@@ -1069,22 +1069,22 @@ export function LawNavigator() {
             const c = colorMap[cat];
             const iconMap = { '상수도': '💧', '하수도': '🔄', '공통': '🔧' };
             return (
-              <div key={cat} className="mb-3">
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <span className="text-xs">{iconMap[cat]}</span>
-                  <p className={`text-[11px] font-semibold ${c.text}`}>{cat}</p>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${c.badge}`}>{items.length}</span>
+              <div key={cat} className="mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm">{iconMap[cat]}</span>
+                  <p className={`text-sm font-bold ${c.text}`}>{cat}</p>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${c.badge}`}>{items.length}</span>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   {items.map((spec) => (
                     <button
                       key={spec.label}
                       onClick={() => setSelectedSpec(spec)}
-                      className={`w-full text-left px-3 py-2 bg-white border ${c.border} rounded-lg
+                      className={`w-full text-left px-4 py-3 bg-white border ${c.border} rounded-xl
                                  ${c.hover} transition-colors group`}
                     >
-                      <p className={`text-[11px] font-medium text-slate-700 group-hover:${c.text}`}>{spec.label}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">{spec.description}</p>
+                      <p className={`text-sm font-medium text-slate-700 group-hover:${c.text}`}>{spec.label}</p>
+                      <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{spec.description}</p>
                     </button>
                   ))}
                 </div>
@@ -1095,87 +1095,113 @@ export function LawNavigator() {
       )}
 
       {/* 시방서 탭 — 상세 뷰 */}
-      {activeTab === 'specification' && selectedSpec && (
+      {activeTab === 'specification' && selectedSpec && !hasSearched && (
         <div className="flex-1 overflow-y-auto p-3">
           <button
             onClick={() => setSelectedSpec(null)}
-            className="text-xs text-blue-600 hover:text-blue-800 mb-3 flex items-center gap-1"
+            className="text-sm text-blue-600 hover:text-blue-800 mb-3 flex items-center gap-1 font-medium"
           >
             ← 시방서 목록
           </button>
-          <div className="bg-white border border-slate-200 rounded-lg p-3 mb-3">
-            <p className="text-sm font-semibold text-slate-800">{selectedSpec.label}</p>
-            <p className="text-[11px] text-slate-500 mt-1">{selectedSpec.description}</p>
-            <div className="mt-2 flex gap-2 flex-wrap">
-              <span className="text-[9px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+          <div className="bg-white border border-slate-200 rounded-xl p-4 mb-4 shadow-sm">
+            <p className="text-base font-bold text-slate-800">{selectedSpec.label}</p>
+            <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">{selectedSpec.description}</p>
+            <div className="mt-3 flex gap-2 flex-wrap">
+              <span className="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">
                 {selectedSpec.category}
               </span>
-              <span className="text-[9px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
+              <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 font-medium">
                 {selectedSpec.publisher}
               </span>
             </div>
             {selectedSpec.note && (
-              <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">{selectedSpec.note}</p>
+              <p className="text-xs text-slate-400 mt-3 leading-relaxed">{selectedSpec.note}</p>
             )}
           </div>
 
-          {/* 관련 법령 */}
-          <div className="mb-3">
-            <p className="text-[11px] font-semibold text-slate-600 mb-2">관련 법령</p>
-            <div className="space-y-1">
+          {/* 관련 법령 — 시방서 탭 내에서 검색 */}
+          <div className="mb-4">
+            <p className="text-sm font-bold text-slate-600 mb-2">관련 법령 조회</p>
+            <div className="space-y-1.5">
               {selectedSpec.relatedLaws.map((law) => (
                 <button
                   key={law}
-                  onClick={() => handleSpecLawSearch(law)}
-                  className="w-full text-left px-3 py-2 bg-blue-50/50 border border-blue-100 rounded-lg
-                             hover:bg-blue-100/60 hover:border-blue-200 transition-colors text-[11px] text-blue-700"
+                  onClick={() => {
+                    setSearchOriginTab('specification');
+                    setSearchQuery(law);
+                    handleSearch(law);
+                  }}
+                  className="w-full text-left px-4 py-3 bg-blue-50/50 border border-blue-100 rounded-xl
+                             hover:bg-blue-100/60 hover:border-blue-200 transition-colors text-sm text-blue-700 font-medium
+                             flex items-center justify-between"
                 >
-                  ⚖️ {law}
-                  <span className="text-[9px] text-blue-400 ml-1">→ 법제처 검색</span>
+                  <span>⚖️ {law}</span>
+                  <span className="text-xs text-blue-400">조문 보기 →</span>
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5">
-            <p className="text-[10px] text-amber-700 leading-relaxed">
-              시방서 원문은 국가건설기준센터(KCSC) 또는 각 소관부처에서 확인할 수 있습니다.
-              위 관련 법령을 클릭하면 법제처에서 해당 법령을 검색합니다.
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+            <p className="text-xs text-amber-700 leading-relaxed">
+              <strong>시방서 원문</strong>은 국가건설기준센터(KCSC) 또는 각 소관부처에서 확인할 수 있습니다.
+              위 관련 법령을 클릭하면 <strong>이 탭 안에서</strong> 법제처 조문을 검색합니다.
             </p>
           </div>
+        </div>
+      )}
+
+      {/* 시방서 탭 — 관련 법령 검색 결과 (탭 전환 없이 시방서 탭 내에서 표시) */}
+      {activeTab === 'specification' && selectedSpec && hasSearched && (
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-3 pt-3 pb-1">
+            <button
+              onClick={() => {
+                setSearchResults([]);
+                setSearchQuery('');
+                setHasSearched(false);
+                setLawDetail(null);
+                setSelectedArticle(null);
+                setThreeWayResult(null);
+                setViewState('search');
+              }}
+              className="text-sm text-blue-600 hover:text-blue-800 mb-2 flex items-center gap-1 font-medium"
+            >
+              ← {selectedSpec.label}
+            </button>
+          </div>
+          {renderSearchAndDetail()}
         </div>
       )}
 
       {/* 설계기준 탭 — 목록 */}
       {activeTab === 'design-standard' && !kdsHasSearched && !isKdsLoading && (
         <div className="flex-1 overflow-y-auto p-3">
-          <p className="text-xs font-medium text-slate-600 mb-1">KDS 설계기준 (국가건설기준)</p>
-          <p className="text-[10px] text-slate-400 mb-3">클릭하면 임베딩된 KDS 설계기준 내용을 검색합니다.</p>
+          <p className="text-sm font-bold text-slate-700 mb-1">KDS 설계기준 (국가건설기준)</p>
+          <p className="text-xs text-slate-400 mb-4">클릭하면 임베딩된 KDS 설계기준 내용을 검색합니다.</p>
           <div className="space-y-2">
             {DESIGN_STANDARDS.map((std) => {
-              // KDS 번호에서 소스 추출 (예: "KDS 61 40 10" → "하수도" or "상수도")
               const sourceKey = std.label.startsWith('KDS 61 4') ? '하수도'
                 : std.label.startsWith('KDS 61 3') ? '상수도' : '';
-              // 검색 키워드 추출 (description에서)
               const searchKeyword = std.description.replace(/설계기준/g, '').replace(/시설/g, '').trim().split(' ')[0];
               return (
                 <button
                   key={std.label}
                   onClick={() => handleKdsSearch(searchKeyword, sourceKey ? `${sourceKey}설계기준` : '')}
-                  className="w-full text-left px-3 py-2.5 bg-white border border-slate-200 rounded-lg
+                  className="w-full text-left px-4 py-3 bg-white border border-slate-200 rounded-xl
                              hover:border-green-300 hover:bg-green-50/50 transition-colors group"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-mono shrink-0">
+                    <span className="text-xs px-2 py-0.5 rounded-md bg-green-100 text-green-700 font-mono font-medium shrink-0">
                       {std.label}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-1">{std.description}</p>
+                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">{std.description}</p>
                 </button>
               );
             })}
           </div>
-          <p className="mt-4 text-[10px] text-slate-400 leading-relaxed">
+          <p className="mt-4 text-xs text-slate-400 leading-relaxed">
             KDS 설계기준은 Supabase에 임베딩된 데이터에서 검색됩니다 (1,436청크).
           </p>
         </div>
@@ -1185,8 +1211,8 @@ export function LawNavigator() {
       {activeTab === 'design-standard' && isKdsLoading && (
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="text-center">
-            <div className="animate-spin text-2xl mb-2">🔍</div>
-            <p className="text-xs text-slate-500">KDS 설계기준 검색 중...</p>
+            <div className="animate-spin text-3xl mb-3">🔍</div>
+            <p className="text-sm text-slate-500">KDS 설계기준 검색 중...</p>
           </div>
         </div>
       )}
@@ -1196,50 +1222,35 @@ export function LawNavigator() {
         <div className="flex-1 overflow-y-auto p-3">
           <button
             onClick={() => { setKdsResults([]); setKdsSearchQuery(''); setKdsHasSearched(false); setKdsError(null); }}
-            className="text-xs text-blue-600 hover:text-blue-800 mb-2 flex items-center gap-1"
+            className="text-sm text-blue-600 hover:text-blue-800 mb-3 flex items-center gap-1 font-medium"
           >
             ← 설계기준 목록
           </button>
 
           {/* 에러 표시 */}
           {kdsError && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
-              <p className="text-[11px] text-red-600">{kdsError}</p>
-              <p className="text-[10px] text-red-400 mt-1">Supabase 연결을 확인해주세요.</p>
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-3">
+              <p className="text-sm text-red-600 font-medium">{kdsError}</p>
+              <p className="text-xs text-red-400 mt-1">Supabase 연결을 확인해주세요.</p>
             </div>
           )}
 
           {/* 0건 결과 */}
           {!kdsError && kdsResults.length === 0 && (
             <div className="text-center py-8">
-              <div className="text-2xl mb-2 opacity-30">🔍</div>
-              <p className="text-xs text-slate-500">&ldquo;{kdsSearchQuery}&rdquo;에 대한 결과가 없습니다.</p>
+              <div className="text-3xl mb-3 opacity-30">🔍</div>
+              <p className="text-sm text-slate-500">&ldquo;{kdsSearchQuery}&rdquo;에 대한 결과가 없습니다.</p>
             </div>
           )}
 
           {kdsResults.length > 0 && (
-            <p className="text-[10px] text-slate-400 mb-3">
-              &ldquo;{kdsSearchQuery}&rdquo; 검색 결과 {kdsResults.length}건
+            <p className="text-xs text-slate-500 mb-3 font-medium">
+              &ldquo;{kdsSearchQuery}&rdquo; 검색 결과 <strong className="text-blue-600">{kdsResults.length}건</strong>
             </p>
           )}
-          <div className="space-y-2">
+          <div className="space-y-3">
             {kdsResults.map((item, idx) => (
-              <div key={item.id || idx} className="bg-white border border-slate-200 rounded-lg p-3">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-mono shrink-0">
-                    {item.source?.replace('_', ' ')}
-                  </span>
-                  {item.section && (
-                    <span className="text-[9px] text-slate-400">{item.section}</span>
-                  )}
-                  {item.page && (
-                    <span className="text-[9px] text-slate-400">p.{item.page}</span>
-                  )}
-                </div>
-                <p className="text-[11px] text-slate-700 leading-relaxed whitespace-pre-wrap">
-                  {item.content.length > 500 ? item.content.slice(0, 500) + '...' : item.content}
-                </p>
-              </div>
+              <KdsResultCard key={item.id || idx} item={item} query={kdsSearchQuery} />
             ))}
           </div>
         </div>
@@ -1356,6 +1367,105 @@ function ArticleDetailView({ article, lawName }: { article: ArticleItem; lawName
 
       {article.enforcementDate && (
         <p className="mt-3 text-[10px] text-slate-400">조문 시행일: {formatDate(article.enforcementDate)}</p>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// KDS 검색 결과 카드 (가독성 강화)
+// ============================================================
+
+const KDS_CONTENT_MAX = 400;
+
+function KdsResultCard({ item, query }: {
+  item: { id: string; source: string; section: string | null; page: number | null; content: string };
+  query: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = item.content.length > KDS_CONTENT_MAX;
+  const displayContent = expanded || !isLong
+    ? item.content
+    : item.content.slice(0, KDS_CONTENT_MAX);
+
+  // 키워드 하이라이트 (검색어를 <mark>로 감싸기)
+  const highlightText = (text: string) => {
+    if (!query || query.length < 2) return text;
+    const keywords = query.split(/\s+/).filter((w) => w.length >= 2);
+    if (keywords.length === 0) return text;
+    const pattern = new RegExp(`(${keywords.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+    const parts = text.split(pattern);
+    return parts.map((part, i) =>
+      pattern.test(part)
+        ? <mark key={i} className="bg-yellow-200 text-yellow-900 rounded px-0.5 font-medium">{part}</mark>
+        : part
+    );
+  };
+
+  // 내용을 문단으로 나누기 (빈 줄 또는 "- 숫자 -" 패턴 기준)
+  const formatContent = (text: string) => {
+    // 페이지 구분자 ("- 3 -" 등) 제거
+    const cleaned = text.replace(/^\s*-\s*\d+\s*-\s*$/gm, '').trim();
+    // 빈 줄 기준으로 문단 분리
+    const paragraphs = cleaned.split(/\n{2,}/).filter((p) => p.trim());
+
+    if (paragraphs.length <= 1) {
+      // 단일 문단 — 줄바꿈 기준으로 표시
+      return (
+        <div className="text-[13px] text-slate-700 leading-[1.8]">
+          {highlightText(cleaned)}
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-2.5">
+        {paragraphs.map((para, i) => (
+          <p key={i} className="text-[13px] text-slate-700 leading-[1.8]">
+            {highlightText(para.trim())}
+          </p>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+      {/* 출처 정보 헤더 */}
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
+        <span className="text-xs px-2.5 py-1 rounded-md bg-green-100 text-green-700 font-mono font-bold shrink-0">
+          {item.source?.replace('_', ' ')}
+        </span>
+        {item.section && (
+          <span className="text-xs px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-medium">
+            {item.section}
+          </span>
+        )}
+        {item.page && (
+          <span className="text-xs text-slate-400">
+            p.{item.page}
+          </span>
+        )}
+      </div>
+
+      {/* 본문 — 문단 분리 + 키워드 하이라이트 */}
+      <div className="relative">
+        <div className={isLong && !expanded ? 'max-h-[180px] overflow-hidden' : ''}>
+          {formatContent(displayContent)}
+        </div>
+        {isLong && !expanded && (
+          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent" />
+        )}
+      </div>
+
+      {/* 더 보기 / 접기 */}
+      {isLong && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-2 text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+        >
+          {expanded ? '▲ 접기' : `▼ 더 보기 (${item.content.length}자)`}
+        </button>
       )}
     </div>
   );
