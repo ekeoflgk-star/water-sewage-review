@@ -7,17 +7,11 @@ interface ChatInputProps {
   isStreaming: boolean;
   /** 파일이 준비된 상태인지 (빠른 명령 활성화 조건) */
   hasReadyFiles?: boolean;
+  /** 파일 업로드 트리거 */
+  onTriggerUpload?: () => void;
 }
 
-/** 빠른 명령 칩 목록 */
-const QUICK_COMMANDS = [
-  { label: '🔍 검토 시작', command: '검토 시작', requiresFiles: true },
-  { label: '📐 DXF 분석', command: 'DXF 분석', requiresFiles: true },
-  { label: '📋 보고서 생성', command: '보고서 생성', requiresFiles: false },
-  { label: '⚖️ 인허가 판단', command: '인허가 판단', requiresFiles: true },
-];
-
-export function ChatInput({ onSend, isStreaming, hasReadyFiles = false }: ChatInputProps) {
+export function ChatInput({ onSend, isStreaming, hasReadyFiles = false, onTriggerUpload }: ChatInputProps) {
   const [input, setInput] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -46,41 +40,34 @@ export function ChatInput({ onSend, isStreaming, hasReadyFiles = false }: ChatIn
     // 자동 높이 조절
     const textarea = e.target;
     textarea.style.height = 'auto';
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
-  };
-
-  const handleQuickCommand = (command: string) => {
-    if (isStreaming) return;
-    onSend(command);
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
   };
 
   return (
-    <div className="border-t border-panel-border p-3">
+    <div className="px-4 pb-4 pt-2">
       <div className="max-w-3xl mx-auto">
-        {/* 빠른 명령 칩 (#2) */}
-        <div className="flex flex-wrap gap-1.5 mb-2">
-          {QUICK_COMMANDS.map((cmd) => {
-            const disabled = isStreaming || (cmd.requiresFiles && !hasReadyFiles);
-            return (
-              <button
-                key={cmd.command}
-                onClick={() => handleQuickCommand(cmd.command)}
-                disabled={disabled}
-                className={`text-xs px-2.5 py-1 rounded-full border transition-all
-                  ${disabled
-                    ? 'border-slate-200 text-slate-300 cursor-not-allowed'
-                    : 'border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 hover:border-blue-300 active:scale-95'
-                  }`}
-                title={cmd.requiresFiles && !hasReadyFiles ? '파일을 먼저 업로드하세요' : cmd.command}
-              >
-                {cmd.label}
-              </button>
-            );
-          })}
-        </div>
+        {/* Claude 스타일 입력창 — 둥근 컨테이너 */}
+        <div className={`
+          relative flex items-end gap-0
+          bg-white border border-slate-200 rounded-2xl shadow-sm
+          transition-all duration-200
+          focus-within:border-slate-300 focus-within:shadow-md
+          ${isStreaming ? 'opacity-70' : ''}
+        `}>
+          {/* 파일 첨부 버튼 (좌측) */}
+          {onTriggerUpload && (
+            <button
+              onClick={onTriggerUpload}
+              className="flex-shrink-0 p-3 text-slate-400 hover:text-slate-600 transition-colors"
+              title="파일 업로드"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+              </svg>
+            </button>
+          )}
 
-        {/* 입력창 */}
-        <div className="flex items-end gap-2">
+          {/* 텍스트 입력 */}
           <textarea
             ref={textareaRef}
             value={input}
@@ -89,26 +76,54 @@ export function ChatInput({ onSend, isStreaming, hasReadyFiles = false }: ChatIn
             placeholder={
               isStreaming
                 ? '응답 생성 중...'
-                : '질문을 입력하세요 (Shift+Enter: 줄바꿈)'
+                : '설계 검토에 대해 질문하세요...'
             }
             disabled={isStreaming}
             rows={1}
-            className="flex-1 resize-none rounded-lg border border-slate-300 px-3 py-2 text-sm
-              focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent
-              disabled:opacity-50 disabled:cursor-not-allowed
-              placeholder:text-slate-400"
+            className={`
+              flex-1 resize-none bg-transparent py-3 text-sm leading-relaxed
+              focus:outline-none
+              disabled:cursor-not-allowed
+              placeholder:text-slate-400
+              ${onTriggerUpload ? 'pl-0' : 'pl-4'}
+            `}
           />
+
+          {/* 전송 버튼 (우측) */}
           <button
             onClick={handleSubmit}
             disabled={!input.trim() || isStreaming}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-white
-              bg-blue-600 hover:bg-blue-700 transition-colors
-              disabled:opacity-40 disabled:cursor-not-allowed
-              flex-shrink-0"
+            className={`
+              flex-shrink-0 m-1.5 p-2 rounded-xl transition-all
+              ${input.trim() && !isStreaming
+                ? 'bg-slate-800 text-white hover:bg-slate-700 active:scale-95'
+                : 'bg-slate-100 text-slate-300 cursor-not-allowed'
+              }
+            `}
+            title="전송 (Enter)"
           >
-            {isStreaming ? '...' : '전송'}
+            {isStreaming ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5" />
+                <polyline points="5 12 12 5 19 12" />
+              </svg>
+            )}
           </button>
         </div>
+
+        {/* 하단 도움말 텍스트 */}
+        <p className="text-center text-[10px] text-slate-400 mt-2">
+          상하수도 설계 검토 AI
+          {hasReadyFiles && (
+            <span className="ml-2 text-blue-400">
+              파일 준비됨 — &quot;검토 시작&quot;을 입력하세요
+            </span>
+          )}
+        </p>
       </div>
     </div>
   );

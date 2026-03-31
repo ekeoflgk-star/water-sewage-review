@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useToast } from '@/components/ui/Toast';
+import { parseFileOnClient, canParseOnClient } from '@/lib/parsers/client';
 import type { UploadedFile } from '@/types';
 
 interface DropZoneProps {
@@ -129,21 +130,43 @@ export function DropZone({ onFilesAdded, onFileProgress, onFileStatusChange }: D
         onFilesAdded(newFiles);
       }
 
-      // 각 파일을 XHR로 병렬 업로드
+      // 각 파일을 파싱 (클라이언트 우선 → 서버 fallback)
       const uploadPromises = newFiles.map((uploadedFile, i) => {
         const file = acceptedFiles[i];
 
-        return uploadWithProgress(file, (percent) => {
-          if (percent < 90) {
-            onFileProgress?.(uploadedFile.id, percent);
-          } else if (percent < 100) {
-            onFileStatusChange?.(uploadedFile.id, 'parsing');
-            onFileProgress?.(uploadedFile.id, percent);
+        return (async () => {
+          // 1) 클라이언트 파싱 가능하면 먼저 시도 (4.5MB 제한 우회)
+          if (canParseOnClient(file.name)) {
+            try {
+              onFileStatusChange?.(uploadedFile.id, 'parsing');
+              onFileProgress?.(uploadedFile.id, 10);
+
+              const result = await parseFileOnClient(file, (percent) => {
+                onFileProgress?.(uploadedFile.id, percent);
+              });
+
+              onFileStatusChange?.(uploadedFile.id, 'ready', result.content);
+              addToast('success', `파싱 완료: ${file.name}`);
+              return; // 성공 — 서버 업로드 불필요
+            } catch {
+              // 클라이언트 파싱 실패 → 서버 fallback
+              console.log(`클라이언트 파싱 실패, 서버 fallback: ${file.name}`);
+            }
           }
-        }).then((result) => {
-          onFileStatusChange?.(uploadedFile.id, 'ready', result.content);
-          addToast('success', `파싱 완료: ${file.name}`);
-        }).catch((error: unknown) => {
+
+          // 2) 서버 API 업로드 (DOCX, DXF, 또는 클라이언트 실패 시)
+          return uploadWithProgress(file, (percent) => {
+            if (percent < 90) {
+              onFileProgress?.(uploadedFile.id, percent);
+            } else if (percent < 100) {
+              onFileStatusChange?.(uploadedFile.id, 'parsing');
+              onFileProgress?.(uploadedFile.id, percent);
+            }
+          }).then((result) => {
+            onFileStatusChange?.(uploadedFile.id, 'ready', result.content);
+            addToast('success', `파싱 완료: ${file.name}`);
+          });
+        })().catch((error: unknown) => {
           const errMsg = error instanceof Error ? error.message : '파싱 오류';
           onFileStatusChange?.(uploadedFile.id, 'error', undefined, errMsg);
           addToast('error', `파싱 실패: ${file.name}`);

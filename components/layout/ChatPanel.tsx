@@ -35,22 +35,24 @@ export function ChatPanel({
   onNewSession,
 }: ChatPanelProps) {
   return (
-    <main className="flex-1 flex flex-col h-full min-w-0">
-      {/* 헤더 */}
-      <div className="px-3 py-2 border-b border-panel-border flex items-center justify-between bg-white">
+    <main className="flex-1 flex flex-col h-full min-w-0 bg-white">
+      {/* 헤더 — Claude 스타일 미니멀 */}
+      <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {/* 파일 패널 토글 */}
           <button
             onClick={onToggleFilePanel}
-            className={`text-xs px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${
+            className={`text-xs px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
               filePanelCollapsed
                 ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
+                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
             }`}
             title={filePanelCollapsed ? '파일 패널 펼치기' : '파일 패널 접기'}
           >
-            <span className="text-sm">{filePanelCollapsed ? '📁' : '📂'}</span>
-            <span className="hidden sm:inline">{filePanelCollapsed ? '파일' : '파일'}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+              <polyline points="13 2 13 9 20 9" />
+            </svg>
             {fileCount > 0 && (
               <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full font-medium">
                 {readyFileCount}/{fileCount}
@@ -58,112 +60,121 @@ export function ChatPanel({
             )}
           </button>
 
-          {/* 타이틀 + 상태 */}
-          <div className="flex items-center gap-2">
-            <h1 className="text-sm font-bold text-slate-800">
-              🔍 설계 검토 AI
-            </h1>
-            {isStreaming && (
-              <span className="text-[10px] bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full animate-pulse font-medium">
-                응답 중...
-              </span>
-            )}
-          </div>
+          {/* 타이틀 */}
+          <span className="text-sm font-semibold text-slate-700">
+            설계 검토 AI
+          </span>
+          {isStreaming && (
+            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+          )}
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           {/* 새 세션 버튼 */}
           {onNewSession && messages.length > 0 && (
             <button
               onClick={onNewSession}
-              className="text-[11px] px-2 py-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-              title="새 세션 시작 (대화 초기화)"
+              className="text-[11px] p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
+              title="새 세션 시작"
             >
-              🔄 새 세션
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+              </svg>
             </button>
           )}
           {/* 법령 패널 토글 */}
           <button
             onClick={onToggleLawPanel}
-            className={`text-xs px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${
+            className={`text-xs px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
               lawPanelCollapsed
                 ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
+                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
             }`}
             title={lawPanelCollapsed ? '참고 문서 펼치기' : '참고 문서 접기'}
           >
-            <span className="hidden sm:inline">{lawPanelCollapsed ? '참고' : '참고'}</span>
-            <span className="text-sm">📚</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg>
           </button>
         </div>
       </div>
 
-      {/* 메시지 목록 */}
-      <div className={`flex-1 ${messages.length === 0 ? 'overflow-y-auto custom-scrollbar' : 'overflow-hidden'}`}>
+      {/* 메시지 영역 — Claude 스타일 중앙 정렬 */}
+      <div className={`flex-1 ${messages.length === 0 ? 'overflow-y-auto' : 'overflow-hidden'}`}>
         {messages.length === 0 ? (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center max-w-lg px-6">
-              <div className="text-5xl mb-4">🔍</div>
-              <h2 className="text-lg font-semibold text-slate-700 mb-2">
-                상하수도 설계 검토를 시작하세요
+          <div className="h-full flex flex-col items-center justify-center">
+            <div className="text-center max-w-md px-6">
+              {/* Claude 스타일 로고 + 인사 */}
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-blue-200">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold text-slate-800 mb-2">
+                무엇을 도와드릴까요?
               </h2>
-              <p className="text-sm text-slate-500 leading-relaxed mb-6">
-                설계문서를 업로드하고, 아래 버튼을 눌러 바로 시작할 수 있습니다.
+              <p className="text-sm text-slate-500 leading-relaxed mb-8">
+                설계문서를 업로드하고 검토를 요청하거나,<br/>
+                상하수도 설계 기준에 대해 자유롭게 질문하세요.
               </p>
 
-              {/* 빠른 시작 액션 버튼 (#1) */}
-              <div className="grid grid-cols-3 gap-3 mb-6">
+              {/* Claude 스타일 제안 카드 */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
                 <button
                   onClick={() => {
                     if (filePanelCollapsed) onToggleFilePanel();
                     onTriggerUpload?.();
                   }}
-                  className="flex flex-col items-center gap-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl px-4 py-4 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="group flex items-start gap-3 text-left bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 rounded-xl px-4 py-3.5 transition-all"
                 >
-                  <span className="text-2xl">📄</span>
-                  <span className="text-xs font-semibold text-blue-700">문서 업로드</span>
-                  <span className="text-[10px] text-blue-500">PDF·DOCX·XLSX·DXF</span>
+                  <span className="text-lg mt-0.5">📄</span>
+                  <div>
+                    <p className="text-sm font-medium text-slate-700 group-hover:text-slate-900">문서 업로드</p>
+                    <p className="text-xs text-slate-400 mt-0.5">PDF, DOCX, XLSX, DXF</p>
+                  </div>
                 </button>
                 <button
                   onClick={() => readyFileCount > 0 ? onSendMessage('검토 시작') : undefined}
                   disabled={readyFileCount === 0}
-                  className={`flex flex-col items-center gap-2 rounded-xl px-4 py-4 transition-all border
+                  className={`group flex items-start gap-3 text-left rounded-xl px-4 py-3.5 transition-all border
                     ${readyFileCount > 0
-                      ? 'bg-green-50 hover:bg-green-100 border-green-200 hover:scale-[1.02] active:scale-[0.98]'
-                      : 'bg-slate-50 border-slate-200 opacity-50 cursor-not-allowed'
+                      ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 hover:border-slate-300'
+                      : 'bg-slate-50 border-slate-100 opacity-40 cursor-not-allowed'
                     }`}
                 >
-                  <span className="text-2xl">🔍</span>
-                  <span className={`text-xs font-semibold ${readyFileCount > 0 ? 'text-green-700' : 'text-slate-400'}`}>검토 시작</span>
-                  <span className={`text-[10px] ${readyFileCount > 0 ? 'text-green-500' : 'text-slate-400'}`}>
-                    {readyFileCount > 0 ? `${readyFileCount}개 파일 준비됨` : '파일 업로드 필요'}
-                  </span>
+                  <span className="text-lg mt-0.5">🔍</span>
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">설계 검토</p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {readyFileCount > 0 ? `${readyFileCount}개 파일 준비됨` : '파일 업로드 필요'}
+                    </p>
+                  </div>
                 </button>
                 <button
-                  onClick={() => onSendMessage('무엇을 할 수 있나요?')}
-                  className="flex flex-col items-center gap-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl px-4 py-4 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  onClick={() => onSendMessage('상수도 관로 설계 시 유속 기준은?')}
+                  className="group flex items-start gap-3 text-left bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 rounded-xl px-4 py-3.5 transition-all"
                 >
-                  <span className="text-2xl">💬</span>
-                  <span className="text-xs font-semibold text-purple-700">질문하기</span>
-                  <span className="text-[10px] text-purple-500">자유롭게 질문</span>
-                </button>
-              </div>
-
-              {/* 단계 안내 */}
-              <div className="grid grid-cols-3 gap-2 text-left mb-6">
-                {[
-                  { step: '1', title: '문서 업로드', desc: '설계설명서, 수리계산서, 도면 등' },
-                  { step: '2', title: '검토 요청', desc: '"검토 시작" 또는 구체적 질문' },
-                  { step: '3', title: '결과 확인', desc: '적합/부적합 판정 + 근거' },
-                ].map((item) => (
-                  <div key={item.step} className="flex items-start gap-2 bg-slate-50 rounded-lg px-3 py-2">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center mt-0.5">{item.step}</span>
-                    <div>
-                      <p className="text-xs font-medium text-slate-700">{item.title}</p>
-                      <p className="text-[10px] text-slate-400">{item.desc}</p>
-                    </div>
+                  <span className="text-lg mt-0.5">📐</span>
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">설계 기준 질문</p>
+                    <p className="text-xs text-slate-400 mt-0.5">유속, 관경, 토피 등</p>
                   </div>
-                ))}
+                </button>
+                <button
+                  onClick={() => onSendMessage('인허가 판단')}
+                  disabled={readyFileCount === 0}
+                  className={`group flex items-start gap-3 text-left rounded-xl px-4 py-3.5 transition-all border
+                    ${readyFileCount > 0
+                      ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 hover:border-slate-300'
+                      : 'bg-slate-50 border-slate-100 opacity-40 cursor-not-allowed'
+                    }`}
+                >
+                  <span className="text-lg mt-0.5">⚖️</span>
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">인허가 판단</p>
+                    <p className="text-xs text-slate-400 mt-0.5">도로점용, 하천점용 등</p>
+                  </div>
+                </button>
               </div>
 
               {/* 검토 이력 */}
@@ -175,8 +186,16 @@ export function ChatPanel({
         )}
       </div>
 
-      {/* 입력 영역 */}
-      <ChatInput onSend={onSendMessage} isStreaming={isStreaming} hasReadyFiles={readyFileCount > 0} />
+      {/* 입력 영역 — Claude 스타일 */}
+      <ChatInput
+        onSend={onSendMessage}
+        isStreaming={isStreaming}
+        hasReadyFiles={readyFileCount > 0}
+        onTriggerUpload={() => {
+          if (filePanelCollapsed) onToggleFilePanel();
+          onTriggerUpload?.();
+        }}
+      />
     </main>
   );
 }

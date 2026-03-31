@@ -214,31 +214,31 @@ const MessageBubble = memo(function MessageBubble({ message }: { message: ChatMe
 
   return (
     <>
-      <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 group`}>
-        {!isUser && (
-          <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-xs flex-shrink-0 mr-2 mt-0.5">
-            🔍
+      {/* Claude 스타일: 사용자=우측 심플 / AI=좌측 넓은 블록 */}
+      <div className={`max-w-3xl mx-auto w-full px-4 ${isUser ? 'flex justify-end' : ''} mb-5 group`}>
+        {isUser ? (
+          /* 사용자 메시지 — Claude 스타일 우측 배경 블록 */
+          <div className="max-w-[80%] bg-slate-100 rounded-2xl px-4 py-3 text-sm leading-relaxed text-slate-800">
+            <p className="whitespace-pre-wrap">{message.content}</p>
           </div>
-        )}
-        <div className="flex flex-col max-w-[85%]">
-          <div
-            className={`
-              rounded-2xl px-4 py-2.5 text-sm leading-relaxed
-              ${isUser
-                ? 'bg-blue-600 text-white rounded-br-md'
-                : 'bg-slate-100 text-slate-800 rounded-bl-md'
-              }
-            `}
-          >
-            {isUser ? (
-              <p className="whitespace-pre-wrap">{message.content}</p>
-            ) : (
-              <div className="chat-markdown">
-                <MarkdownContent content={message.content} />
-              </div>
-            )}
+        ) : (
+        <div className="w-full">
+          {/* AI 아이콘 */}
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+              </svg>
+            </div>
+            <span className="text-xs font-medium text-slate-500">설계 검토 AI</span>
+          </div>
+          {/* AI 응답 — Claude 스타일 넓은 텍스트 */}
+          <div className="text-sm leading-relaxed text-slate-800 pl-8">
+            <div className="chat-markdown">
+              <MarkdownContent content={message.content} />
+            </div>
 
-          {hasCards && <div className="border-t border-slate-200/80 mt-3 pt-3" />}
+          {hasCards && <div className="border-t border-slate-200 mt-4 pt-4" />}
 
           {/* 설계 검토 카드 (#5 — 필터 탭 적용) */}
           {hasReviewCards && (() => {
@@ -321,12 +321,13 @@ const MessageBubble = memo(function MessageBubble({ message }: { message: ChatMe
           )}
           </div>
           {/* 메시지 시간 표시 (호버 시 표시) */}
-          <span className={`text-[10px] text-slate-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${isUser ? 'text-right' : 'text-left'}`}>
+          <span className={`text-[10px] text-slate-400 mt-1 pl-8 opacity-0 group-hover:opacity-100 transition-opacity`}>
             {message.timestamp instanceof Date
               ? message.timestamp.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
               : ''}
           </span>
         </div>
+        )}
       </div>
 
       {/* 근거 비교 모달 */}
@@ -363,23 +364,28 @@ export function MessageList({ messages, isStreaming }: MessageListProps) {
   }, []);
 
   return (
-    <div ref={containerRef} onScroll={handleScroll} className="relative h-full overflow-y-auto custom-scrollbar">
-      <div className="px-4 py-4 max-w-3xl mx-auto">
+    <div ref={containerRef} onScroll={handleScroll} className="relative h-full overflow-y-auto custom-scrollbar bg-white">
+      <div className="py-6">
         {messages.map((msg) => (
           <MessageBubble key={msg.id} message={msg} />
         ))}
 
+        {/* Claude 스타일 스트리밍 인디케이터 */}
         {isStreaming && (
-          <div className="flex justify-start mb-4">
-            <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-xs flex-shrink-0 mr-2 mt-0.5">
-              🔍
+          <div className="max-w-3xl mx-auto px-4 mb-5">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-slate-500">설계 검토 AI</span>
             </div>
-            <div className="bg-slate-100 rounded-2xl rounded-bl-md px-4 py-3">
-              <div className="flex gap-1.5 items-center">
-                <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" />
-                <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce [animation-delay:0.15s]" />
-                <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce [animation-delay:0.3s]" />
-                <span className="text-[11px] text-slate-400 ml-2">분석 중...</span>
+            <div className="pl-8">
+              <div className="flex gap-1 items-center">
+                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
+                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.15s]" />
+                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.3s]" />
               </div>
             </div>
           </div>
