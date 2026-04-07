@@ -60,9 +60,21 @@ interface ArticleUnit {
   항?: ParagraphData | ParagraphData[];
 }
 
+interface SubItemData {
+  목번호?: string;
+  목내용?: string;
+}
+
+interface ItemData {
+  호번호?: string;
+  호내용?: string;
+  목?: SubItemData | SubItemData[];
+}
+
 interface ParagraphData {
   항번호?: string;
   항내용?: string;
+  호?: ItemData | ItemData[];
 }
 
 /**
@@ -238,15 +250,28 @@ async function fetchLawDetail(lawId: string) {
 }
 
 /**
- * 항(Paragraph) 파싱 헬퍼
+ * 목(目) 파싱 헬퍼
  */
-function parseParagraphs(paragraphData: ParagraphData | ParagraphData[] | undefined): Array<{ number: string; content: string }> {
+function parseSubItems(data: SubItemData | SubItemData[] | undefined): Array<{ number: string; content: string }> {
+  if (!data) return [];
+  const arr = Array.isArray(data) ? data : [data];
+  return arr.map((m) => ({ number: m?.목번호 || '', content: m?.목내용 || '' }));
+}
+
+/**
+ * 호(號) 파싱 헬퍼
+ */
+function parseItems(data: ItemData | ItemData[] | undefined): Array<{ number: string; content: string; subItems: Array<{ number: string; content: string }> }> {
+  if (!data) return [];
+  const arr = Array.isArray(data) ? data : [data];
+  return arr.map((h) => ({ number: h?.호번호 || '', content: h?.호내용 || '', subItems: parseSubItems(h?.목) }));
+}
+
+/**
+ * 항(Paragraph) 파싱 헬퍼 — 호/목 포함
+ */
+function parseParagraphs(paragraphData: ParagraphData | ParagraphData[] | undefined): Array<{ number: string; content: string; items: Array<{ number: string; content: string; subItems: Array<{ number: string; content: string }> }> }> {
   if (!paragraphData) return [];
-
-  const items = Array.isArray(paragraphData) ? paragraphData : [paragraphData];
-
-  return items.map((p) => ({
-    number: p?.항번호 || '',
-    content: p?.항내용 || '',
-  }));
+  const arr = Array.isArray(paragraphData) ? paragraphData : [paragraphData];
+  return arr.map((p) => ({ number: p?.항번호 || '', content: p?.항내용 || '', items: parseItems(p?.호) }));
 }

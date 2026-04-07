@@ -1,711 +1,115 @@
-'use client';
-
-import { useState, useCallback, useRef, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import { useToast } from '@/components/ui/Toast';
-import {
-  saveMessages, loadMessages,
-  saveFiles, loadFiles,
-  saveProjects, loadProjects,
-  saveActiveProjectId, loadActiveProjectId,
-  saveSessionId, loadSessionId,
-  saveSessions, loadSessions,
-  saveSessionMessages, loadSessionMessages,
-  saveSessionFiles, loadSessionFiles,
-  saveSessionProjects, loadSessionProjects,
-  deleteSessionData,
-} from '@/lib/storage';
-import type { UploadedFile, ChatMessage, ReviewCard, PermitCard, Project, Session } from '@/types';
-import type { DxfAnalysisResult } from '@/types/dxf';
-
-// SSR 비활성화 — react-resizable-panels가 클라이언트에서 px→flex-grow 변환 시
-// 서버 렌더링과 불일치하여 hydration 오류 + ref 끊김 발생 방지
-const ResizableLayout = dynamic(
-  () => import('@/components/layout/ResizableLayout').then((mod) => mod.ResizableLayout),
-  { ssr: false }
-);
-
-export default function Home() {
-  // 파일 상태 (localStorage에서 복원)
-  const [files, setFiles] = useState<UploadedFile[]>([]);
-
-  // 프로젝트 폴더 상태
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
-
-  // 채팅 상태
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isStreaming, setIsStreaming] = useState(false);
-
-  // 세션 관리
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [activeSessionId, setActiveSessionId] = useState<string>('');
-
-  // 검토 상태
-  const [isReviewing, setIsReviewing] = useState(false);
-  const sessionIdRef = useRef<string>(crypto.randomUUID());
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  // ───── localStorage 복원 (최초 마운트) ─────
-  useEffect(() => {
-    // 세션 목록 복원
-    let savedSessions = loadSessions<Session>();
-    let currentSessionId = loadSessionId() || '';
-
-    // 기존 단일 세션 데이터 마이그레이션
-    if (savedSessions.length === 0) {
-      const savedMessages = loadMessages<ChatMessage>();
-      const savedFiles = loadFiles<UploadedFile>();
-      const savedProjects = loadProjects<Project>();
-      const id = currentSessionId || crypto.randomUUID();
-      const firstMsg = savedMessages[0]?.content || '';
-      const title = firstMsg.length > 0
-        ? firstMsg.slice(0, 30) + (firstMsg.length > 30 ? '...' : '')
-        : '새 대화';
-      const newSession: Session = {
-        id,
-        title,
-        createdAt: savedMessages[0]?.timestamp || new Date(),
-        updatedAt: savedMessages[savedMessages.length - 1]?.timestamp || new Date(),
-      };
-      savedSessions = [newSession];
-      currentSessionId = id;
-      // 기존 데이터를 세션별 스토리지로 마이그레이션
-      if (savedMessages.length > 0) saveSessionMessages(id, savedMessages);
-      if (savedFiles.length > 0) saveSessionFiles(id, savedFiles);
-      if (savedProjects.length > 0) saveSessionProjects(id, savedProjects);
-      saveSessions(savedSessions);
-      saveSessionId(id);
-    }
-
-    // 활성 세션이 없으면 첫 번째 세션 선택
-    if (!currentSessionId && savedSessions.length > 0) {
-      currentSessionId = savedSessions[0].id;
-    }
-
-    // 해당 세션 데이터 로드
-    setSessions(savedSessions);
-    setActiveSessionId(currentSessionId);
-    sessionIdRef.current = currentSessionId;
-
-    const sessionMessages = loadSessionMessages<ChatMessage>(currentSessionId);
-    const sessionFiles = loadSessionFiles<UploadedFile>(currentSessionId);
-    const sessionProjects = loadSessionProjects<Project>(currentSessionId);
-    const savedActiveProjectId = loadActiveProjectId();
-
-    if (sessionMessages.length > 0) setMessages(sessionMessages);
-    if (sessionFiles.length > 0) setFiles(sessionFiles);
-    if (sessionProjects.length > 0) setProjects(sessionProjects);
-    if (savedActiveProjectId) setActiveProjectId(savedActiveProjectId);
-
-    setIsHydrated(true);
-  }, []);
-
-  // ───── 상태 변경 시 자동 저장 (세션별) ─────
-  useEffect(() => {
-    if (!isHydrated || !activeSessionId) return;
-    saveSessionMessages(activeSessionId, messages);
-    // 레거시 호환용
-    saveMessages(messages);
-  }, [messages, isHydrated, activeSessionId]);
-
-  useEffect(() => {
-    if (!isHydrated || !activeSessionId) return;
-    saveSessionFiles(activeSessionId, files);
-    saveFiles(files);
-  }, [files, isHydrated, activeSessionId]);
-
-  useEffect(() => {
-    if (!isHydrated || !activeSessionId) return;
-    saveSessionProjects(activeSessionId, projects);
-    saveProjects(projects);
-  }, [projects, isHydrated, activeSessionId]);
-
-  useEffect(() => {
-    if (!isHydrated) return;
-    saveActiveProjectId(activeProjectId);
-  }, [activeProjectId, isHydrated]);
-
-  useEffect(() => {
-    if (!isHydrated) return;
-    saveSessions(sessions);
-  }, [sessions, isHydrated]);
-
-  // 세션 제목 자동 업데이트 (첫 메시지 기반)
-  useEffect(() => {
-    if (!isHydrated || !activeSessionId || messages.length === 0) return;
-    const firstUserMsg = messages.find((m) => m.role === 'user');
-    if (!firstUserMsg) return;
-    const autoTitle = firstUserMsg.content.slice(0, 30) + (firstUserMsg.content.length > 30 ? '...' : '');
-    setSessions((prev) =>
-      prev.map((s) =>
-        s.id === activeSessionId && s.title === '새 대화'
-          ? { ...s, title: autoTitle, updatedAt: new Date() }
-          : s.id === activeSessionId
-          ? { ...s, updatedAt: new Date() }
-          : s
-      )
-    );
-  }, [messages, isHydrated, activeSessionId]);
-
-  const { addToast } = useToast();
-
-  // ───── 파일 핸들러 ─────
-
-  const handleFilesAdded = useCallback((newFiles: UploadedFile[]) => {
-    setFiles((prev) => [...prev, ...newFiles]);
-    // 활성 프로젝트가 있으면 자동으로 해당 프로젝트에 추가
-    if (activeProjectId) {
-      const newIds = newFiles.map((f) => f.id);
-      setProjects((prev) =>
-        prev.map((p) =>
-          p.id === activeProjectId
-            ? { ...p, fileIds: [...p.fileIds, ...newIds], updatedAt: new Date() }
-            : p
-        )
-      );
-    }
-  }, [activeProjectId]);
-
-  const handleFileRemove = useCallback((fileId: string) => {
-    setFiles((prev) => prev.filter((f) => f.id !== fileId));
-    // 프로젝트에서도 제거
-    setProjects((prev) =>
-      prev.map((p) => ({
-        ...p,
-        fileIds: p.fileIds.filter((id) => id !== fileId),
-      }))
-    );
-  }, []);
-
-  /** 파일이 속한 프로젝트 ID 찾기 (없으면 세션 ID fallback) */
-  const getProjectIdForFile = useCallback((fileId: string): string => {
-    const project = projects.find((p) => p.fileIds.includes(fileId));
-    return project?.id || activeProjectId || sessionIdRef.current;
-  }, [projects, activeProjectId]);
-
-  const handleGroupChange = useCallback((fileId: string, group: UploadedFile['group']) => {
-    setFiles((prev) =>
-      prev.map((f) => (f.id === fileId ? { ...f, group } : f))
-    );
-
-    // 추가참고문서로 분류 시 자동 임베딩 (사업별 격리)
-    if (group === 'guideline') {
-      const file = files.find((f) => f.id === fileId);
-      if (file?.content && file.embedStatus !== 'embedded' && file.embedStatus !== 'embedding') {
-        const projectId = getProjectIdForFile(fileId);
-        embedGuidelineFile(fileId, file.name, file.content, projectId);
-      }
-    }
-  }, [files, getProjectIdForFile]);
-
-  /** 추가참고문서 임베딩 (Layer 2 — 사업별 project_documents) */
-  const embedGuidelineFile = useCallback(async (fileId: string, fileName: string, content: string, projectId: string) => {
-    const projectName = projects.find((p) => p.id === projectId)?.name;
-
-    // 상태: 임베딩 중
-    setFiles((prev) =>
-      prev.map((f) => (f.id === fileId ? { ...f, embedStatus: 'embedding' as const, embedProjectId: projectId } : f))
-    );
-    addToast('info', `📌 "${fileName}" 추가참고문서 임베딩 중${projectName ? ` (📂 ${projectName})` : ''}...`);
-
-    try {
-      const response = await fetch('/api/embed', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content,
-          fileName: `[추가참고문서] ${fileName}`,
-          sessionId: projectId,  // 사업 ID로 격리
-        }),
-      });
-
-      if (!response.ok) {
-        const errBody = await response.json().catch(() => null);
-        throw new Error(errBody?.error || `임베딩 오류: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setFiles((prev) =>
-        prev.map((f) =>
-          f.id === fileId
-            ? { ...f, embedStatus: 'embedded' as const, embedChunks: data.chunksCreated, embedProjectId: projectId }
-            : f
-        )
-      );
-      addToast('success', `📌 "${fileName}" 임베딩 완료 (${data.chunksCreated}개 청크)${projectName ? ` — 📂 ${projectName} 전용` : ''}`);
-    } catch (error) {
-      const errMsg = error instanceof Error ? error.message : '임베딩 실패';
-      setFiles((prev) =>
-        prev.map((f) => (f.id === fileId ? { ...f, embedStatus: 'embed-error' as const, errorMessage: errMsg } : f))
-      );
-      addToast('error', `임베딩 실패: ${errMsg}`);
-    }
-  }, [addToast, projects]);
-
-  // 파일 업로드 진행률 업데이트
-  const handleFileProgress = useCallback((fileId: string, progress: number) => {
-    setFiles((prev) =>
-      prev.map((f) => (f.id === fileId ? { ...f, uploadProgress: progress } : f))
-    );
-  }, []);
-
-  // 파일 상태 변경 (업로드→파싱→완료/에러)
-  const handleFileStatusChange = useCallback((fileId: string, status: UploadedFile['status'], content?: string, error?: string) => {
-    setFiles((prev) =>
-      prev.map((f) => {
-        if (f.id !== fileId) return f;
-        return {
-          ...f,
-          status,
-          ...(content !== undefined && { content }),
-          ...(error && { errorMessage: error }),
-          ...(status === 'ready' && { uploadProgress: 100 }),
-        };
-      })
-    );
-  }, []);
-
-  // ───── 프로젝트 폴더 핸들러 ─────
-
-  const handleCreateProject = useCallback((name: string, parentId?: string) => {
-    const newProject: Project = {
-      id: crypto.randomUUID(),
-      name,
-      parentId,
-      fileIds: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    setProjects((prev) => [...prev, newProject]);
-    setActiveProjectId(newProject.id);
-    addToast('success', `"${name}" 폴더가 생성되었습니다.`);
-  }, [addToast]);
-
-  const handleDeleteProject = useCallback((projectId: string) => {
-    // 하위 폴더 ID도 수집하여 함께 삭제
-    const idsToDelete = new Set<string>();
-    const collectChildren = (pid: string) => {
-      idsToDelete.add(pid);
-      const children = projects.filter((p) => p.parentId === pid);
-      children.forEach((c) => collectChildren(c.id));
-    };
-    collectChildren(projectId);
-    setProjects((prev) => prev.filter((p) => !idsToDelete.has(p.id)));
-    if (activeProjectId && idsToDelete.has(activeProjectId)) {
-      setActiveProjectId(null);
-    }
-  }, [activeProjectId, projects]);
-
-  const handleRenameProject = useCallback((projectId: string, newName: string) => {
-    setProjects((prev) =>
-      prev.map((p) =>
-        p.id === projectId ? { ...p, name: newName, updatedAt: new Date() } : p
-      )
-    );
-  }, []);
-
-  const handleMoveFileToProject = useCallback((fileId: string, projectId: string | null) => {
-    setProjects((prev) =>
-      prev.map((p) => {
-        // 기존 프로젝트에서 제거
-        const filtered = p.fileIds.filter((id) => id !== fileId);
-        // 대상 프로젝트에 추가
-        if (p.id === projectId) {
-          return { ...p, fileIds: [...filtered, fileId], updatedAt: new Date() };
-        }
-        return { ...p, fileIds: filtered };
-      })
-    );
-  }, []);
-
-  // ───── 키워드 감지 ─────
-
-  const isReviewCommand = (text: string) => {
-    const keywords = ['검토 시작', '검토시작', '설계 검토', '설계검토', '자동 검토', '자동검토'];
-    return keywords.some((kw) => text.includes(kw));
-  };
-
-  const isDxfAnalyzeCommand = (text: string) => {
-    const keywords = ['인허가 분석', '인허가분석', 'DXF 분석', 'DXF분석', 'dxf 분석', '도면 분석', '도면분석'];
-    return keywords.some((kw) => text.includes(kw));
-  };
-
-  // ───── 설계 검토 핸들러 ─────
-
-  const handleReview = useCallback(async () => {
-    const readyFiles = files.filter((f) => f.status === 'ready' && f.content);
-
-    if (readyFiles.length === 0) {
-      addToast('warning', '검토할 파일이 없습니다. 파일을 먼저 업로드하세요.');
-      return;
-    }
-
-    setIsReviewing(true);
-
-    const currentProjectId = activeProjectId || sessionIdRef.current;
-    const guidelineFiles = files.filter(
-      (f) => f.group === 'guideline' && f.embedStatus === 'embedded' && f.embedProjectId === currentProjectId
-    );
-    const guidelineNote = guidelineFiles.length > 0
-      ? `\n\n📌 **추가참고문서 ${guidelineFiles.length}건** 적용 중: ${guidelineFiles.map((f) => f.name).join(', ')}`
-      : '';
-
-    const progressMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      content: `📋 업로드된 ${readyFiles.length}개 파일을 기반으로 설계 검토를 시작합니다...\n\n검토 항목: 유속, 관경, 토피, 경사, 충만도 등${guidelineNote}`,
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, progressMessage]);
-
-    try {
-      const allReviewCards: ReviewCard[] = [];
-      const allPermitCards: PermitCard[] = [];
-
-      for (const file of readyFiles) {
-        const response = await fetch('/api/review', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fileContent: file.content,
-            fileName: file.name,
-            fileGroup: file.group,
-            sessionId: activeProjectId || sessionIdRef.current,  // 사업별 추가참고문서 격리
-            reviewScope: 'sewer-pipeline',
-          }),
-        });
-
-        if (!response.ok) {
-          const errBody = await response.json().catch(() => null);
-          throw new Error(errBody?.error || `검토 API 오류: ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (data.reviewCards) allReviewCards.push(...data.reviewCards);
-        if (data.permitCards) allPermitCards.push(...data.permitCards);
-      }
-
-      const passCount = allReviewCards.filter((c) => c.verdict === 'pass').length;
-      const failCount = allReviewCards.filter((c) => c.verdict === 'fail').length;
-      const checkCount = allReviewCards.filter((c) => c.verdict === 'check').length;
-
-      const resultMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: `## 설계 검토 완료\n\n총 **${allReviewCards.length}개** 항목 검토 | 🟢 적합 ${passCount} | 🔴 부적합 ${failCount} | 🟡 확인필요 ${checkCount}\n\n인허가 판단: **${allPermitCards.length}개** 항목 확인\n\n---\n\n아래 **설계도서 검토의견서** 양식에서 결과를 확인하고, 한글 파일로 다운로드할 수 있습니다.`,
-        timestamp: new Date(),
-        reviewCards: allReviewCards,
-        permitCards: allPermitCards,
-      };
-
-      setMessages((prev) =>
-        prev.map((m) => (m.id === progressMessage.id ? resultMessage : m))
-      );
-
-      addToast('success', `검토 완료: ${allReviewCards.length}개 항목`);
-    } catch (error) {
-      const errMsg = error instanceof Error ? error.message : '검토 중 오류 발생';
-      addToast('error', errMsg);
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === progressMessage.id ? { ...m, content: `❌ 검토 실패: ${errMsg}` } : m
-        )
-      );
-    } finally {
-      setIsReviewing(false);
-    }
-  }, [files, addToast]);
-
-  // ───── DXF 인허가 분석 핸들러 ─────
-
-  const handleDxfAnalyze = useCallback(async () => {
-    const dxfFiles = files.filter((f) => f.type === 'dxf' && f.status === 'ready');
-
-    if (dxfFiles.length === 0) {
-      addToast('warning', 'DXF 파일이 없습니다. .dxf 파일을 먼저 업로드하세요.');
-      return;
-    }
-
-    const progressMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      content: `📐 DXF 파일 ${dxfFiles.length}개의 인허가 분석을 시작합니다...\n\n레이어 접두사: **$**(설계), **#**(인허가) 기반으로 분석합니다.`,
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, progressMessage]);
-    setIsReviewing(true);
-
-    try {
-      for (const dxfFile of dxfFiles) {
-        const content = dxfFile.content || '';
-        const layerSection = content.split('[레이어 목록]')[1]?.split('[텍스트 내용]')[0] || '';
-        const layerNames = layerSection.split('\n').filter(l => l.startsWith('- ')).map(l => l.slice(2).trim());
-
-        const permitLayers = layerNames.filter(n => n.startsWith('#'));
-        const designLayers = layerNames.filter(n => n.startsWith('$'));
-        const cadastralLayers = layerNames.filter(n => n.includes('지적'));
-
-        const PERMIT_MAP: Record<string, string> = {
-          '#도로구역': '도로 점용 허가', '#하천구역': '하천 점용 허가',
-          '#소하천구역': '소하천 점용 허가', '#영구점용선': '도로 점용 허가',
-          '#일시점용선': '도로 점용 허가', '#농지': '농지 전용 허가',
-          '#산지': '산지 전용 허가', '#철도보호지구': '철도 보호지구 행위허가',
-          '#군사시설보호구역': '군사시설 보호구역 행위허가', '#문화재보호구역': '문화재 현상변경 허가',
-        };
-
-        const permits = permitLayers
-          .filter(n => PERMIT_MAP[n])
-          .map((n) => ({
-            permitName: PERMIT_MAP[n],
-            source: 'layer' as const,
-            sourceDetail: `${n} 레이어 존재`,
-            layerName: n,
-          }));
-
-        const uniquePermits = Array.from(
-          new Map(permits.map(p => [p.permitName, p])).values()
-        );
-
-        const dxfResult: DxfAnalysisResult = {
-          fileName: dxfFile.name,
-          layerSummary: {
-            total: layerNames.length,
-            design: designLayers.map(n => ({ name: n, role: 'design' as const, prefix: '$' as const, baseName: n.slice(1), entityCount: 0, hasPolylines: false, hasTexts: false })),
-            permit: permitLayers.map(n => ({ name: n, role: 'permit' as const, prefix: '#' as const, baseName: n.slice(1), entityCount: 0, hasPolylines: false, hasTexts: false })),
-            cadastral: cadastralLayers.map(n => ({ name: n, role: 'cadastral' as const, prefix: '' as const, baseName: n, entityCount: 0, hasPolylines: false, hasTexts: false })),
-            general: layerNames.filter(n => !n.startsWith('$') && !n.startsWith('#') && !n.includes('지적')).map(n => ({ name: n, role: 'general' as const, prefix: '' as const, baseName: n, entityCount: 0, hasPolylines: false, hasTexts: false })),
-          },
-          parcels: [],
-          permits: uniquePermits,
-          warnings: cadastralLayers.length === 0
-            ? ['지적 레이어가 없어 지목 기반 분석을 건너뛰었습니다.']
-            : [],
-          analyzedAt: new Date().toISOString(),
-        };
-
-        const resultMessage: ChatMessage = {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: `## DXF 인허가 분석 완료\n\n**${dxfFile.name}** — ${layerNames.length}개 레이어 | 설계($) ${designLayers.length} | 인허가(#) ${permitLayers.length}\n\n감지된 인허가: **${uniquePermits.length}건**`,
-          timestamp: new Date(),
-          dxfAnalysis: dxfResult,
-        };
-
-        setMessages((prev) =>
-          prev.map((m) => (m.id === progressMessage.id ? resultMessage : m))
-        );
-      }
-
-      addToast('success', 'DXF 인허가 분석 완료');
-    } catch (error) {
-      const errMsg = error instanceof Error ? error.message : '분석 중 오류 발생';
-      addToast('error', errMsg);
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === progressMessage.id ? { ...m, content: `❌ DXF 분석 실패: ${errMsg}` } : m
-        )
-      );
-    } finally {
-      setIsReviewing(false);
-    }
-  }, [files, addToast]);
-
-  // ───── 채팅 메시지 전송 핸들러 ─────
-
-  const handleSendMessage = useCallback(async (content: string) => {
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content,
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
-
-    if (isDxfAnalyzeCommand(content)) {
-      await handleDxfAnalyze();
-      return;
-    }
-
-    if (isReviewCommand(content)) {
-      await handleReview();
-      return;
-    }
-
-    setIsStreaming(true);
-
-    try {
-      // 파일 컨텍스트 (토큰 절약: 파일당 최대 8,000자, 전체 최대 30,000자)
-      const MAX_PER_FILE = 8_000;
-      const MAX_TOTAL = 30_000;
-      let totalLen = 0;
-      const fileContextParts: string[] = [];
-      for (const f of files.filter((f) => f.status === 'ready' && f.content)) {
-        const truncated = f.content!.length > MAX_PER_FILE
-          ? f.content!.slice(0, MAX_PER_FILE) + `\n...(이하 ${(f.content!.length - MAX_PER_FILE).toLocaleString()}자 생략)`
-          : f.content!;
-        if (totalLen + truncated.length > MAX_TOTAL) break;
-        fileContextParts.push(`[파일: ${f.name}]\n${truncated}`);
-        totalLen += truncated.length;
-      }
-      const fileContexts = fileContextParts.join('\n\n---\n\n');
-
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: content,
-          fileContext: fileContexts || undefined,
-          history: messages.map((m) => ({ role: m.role, content: m.content })),
-        }),
-      });
-
-      if (!response.ok) {
-        const errBody = await response.json().catch(() => null);
-        const errMsg = errBody?.error || `API 오류: ${response.status}`;
-        if (response.status === 429) {
-          addToast('warning', '무료 사용량 한도 도달 — 잠시 후 다시 시도하세요');
-        }
-        throw new Error(errMsg);
-      }
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let assistantContent = '';
-
-      const assistantMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: '',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          assistantContent += chunk;
-          setMessages((prev) =>
-            prev.map((m) => (m.id === assistantMessage.id ? { ...m, content: assistantContent } : m))
-          );
-        }
-      }
-    } catch (error) {
-      const errorMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: 'system',
-        content: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsStreaming(false);
-    }
-  }, [files, messages, addToast, handleReview, handleDxfAnalyze]);
-
-  // ───── 새 세션 생성 ─────
-  const handleCreateSession = useCallback(() => {
-    const newId = crypto.randomUUID();
-    const newSession: Session = {
-      id: newId,
-      title: '새 대화',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    setSessions((prev) => [newSession, ...prev]);
-    setActiveSessionId(newId);
-    sessionIdRef.current = newId;
-    saveSessionId(newId);
-    setMessages([]);
-    setFiles([]);
-    setProjects([]);
-    setActiveProjectId(null);
-    addToast('info', '새 대화가 시작되었습니다.');
-  }, [addToast]);
-
-  // ───── 세션 전환 ─────
-  const handleSelectSession = useCallback((sessionId: string) => {
-    if (sessionId === activeSessionId) return;
-    // 현재 세션 데이터 저장은 useEffect에서 자동 처리
-    setActiveSessionId(sessionId);
-    sessionIdRef.current = sessionId;
-    saveSessionId(sessionId);
-    // 새 세션 데이터 로드
-    const sessionMessages = loadSessionMessages<ChatMessage>(sessionId);
-    const sessionFiles = loadSessionFiles<UploadedFile>(sessionId);
-    const sessionProjects = loadSessionProjects<Project>(sessionId);
-    setMessages(sessionMessages);
-    setFiles(sessionFiles);
-    setProjects(sessionProjects);
-    setActiveProjectId(null);
-  }, [activeSessionId]);
-
-  // ───── 세션 삭제 ─────
-  const handleDeleteSession = useCallback((sessionId: string) => {
-    deleteSessionData(sessionId);
-    setSessions((prev) => {
-      const updated = prev.filter((s) => s.id !== sessionId);
-      // 삭제된 세션이 활성 세션이면 다른 세션으로 전환
-      if (sessionId === activeSessionId) {
-        if (updated.length > 0) {
-          const nextId = updated[0].id;
-          setActiveSessionId(nextId);
-          sessionIdRef.current = nextId;
-          saveSessionId(nextId);
-          setMessages(loadSessionMessages<ChatMessage>(nextId));
-          setFiles(loadSessionFiles<UploadedFile>(nextId));
-          setProjects(loadSessionProjects<Project>(nextId));
-        } else {
-          // 모든 세션 삭제 → 새 세션 생성
-          handleCreateSession();
-        }
-      }
-      return updated;
-    });
-    addToast('info', '대화가 삭제되었습니다.');
-  }, [activeSessionId, addToast, handleCreateSession]);
-
-  // ───── 세션 이름 변경 ─────
-  const handleRenameSession = useCallback((sessionId: string, newTitle: string) => {
-    setSessions((prev) =>
-      prev.map((s) =>
-        s.id === sessionId ? { ...s, title: newTitle, updatedAt: new Date() } : s
-      )
-    );
-  }, []);
-
-  // ───── 새 세션 (ChatPanel 헤더 버튼용 — 기존 호환) ─────
-  const handleNewSession = useCallback(() => {
-    handleCreateSession();
-  }, [handleCreateSession]);
-
+import Link from 'next/link';
+
+const FEATURES = [
+  {
+    href: '/review',
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+    ),
+    title: '설계검토',
+    subtitle: 'AI 자동 검토 + 인허가 판단',
+    description: '설계문서(PDF, DOCX, XLSX, DXF)를 업로드하면 법령과 KDS 설계기준을 자동 대조하여 적합/부적합을 판정합니다.',
+    items: ['유속·관경·토피·경사 자동 검토', '인허가 15종 자동 판단', 'DXF 레이어 분석', '검토의견서 다운로드'],
+    color: 'blue',
+  },
+  {
+    href: '/reference',
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+      </svg>
+    ),
+    title: '참고문서',
+    subtitle: '법령 · 시방서 · 설계기준 탐색',
+    description: '법제처 Open API로 상하수도 관련 법령을 실시간 검색하고, 조문 항/호/목을 계층적으로 탐색합니다.',
+    items: ['법률 → 시행령 → 시행규칙 3단비교', '상하수도 시방서 14종', 'KDS 설계기준 (임베딩 검색)', '조문 항·호·목 계층 표시'],
+    color: 'emerald',
+  },
+] as const;
+
+export default function HomePage() {
   return (
-    <ResizableLayout
-      files={files}
-      messages={messages}
-      isStreaming={isStreaming || isReviewing}
-      onSendMessage={handleSendMessage}
-      onFilesAdded={handleFilesAdded}
-      onFileRemove={handleFileRemove}
-      onGroupChange={handleGroupChange}
-      onFileProgress={handleFileProgress}
-      onFileStatusChange={handleFileStatusChange}
-      projects={projects}
-      activeProjectId={activeProjectId}
-      onCreateProject={handleCreateProject}
-      onSelectProject={setActiveProjectId}
-      onDeleteProject={handleDeleteProject}
-      onRenameProject={handleRenameProject}
-      onMoveFileToProject={handleMoveFileToProject}
-      onNewSession={handleNewSession}
-      sessions={sessions}
-      activeSessionId={activeSessionId}
-      onSelectSession={handleSelectSession}
-      onCreateSession={handleCreateSession}
-      onDeleteSession={handleDeleteSession}
-      onRenameSession={handleRenameSession}
-    />
+    <div className="h-full flex flex-col items-center justify-center bg-gradient-to-b from-slate-50 to-white px-6">
+      {/* 히어로 */}
+      <div className="text-center mb-10">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-blue-200/50">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+          </svg>
+        </div>
+        <h1 className="text-2xl font-bold text-slate-900 mb-2">
+          상하수도 설계 검토 플랫폼
+        </h1>
+        <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+          설계 성과품을 업로드하면 법령·KDS 설계기준과 자동 대조하여<br />
+          적합/부적합을 판정하는 AI 검토 도구입니다.
+        </p>
+      </div>
+
+      {/* 기능 카드 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full">
+        {FEATURES.map((feature) => (
+          <Link
+            key={feature.href}
+            href={feature.href}
+            className={`group relative bg-white border-2 rounded-2xl p-6 transition-all duration-200 hover:shadow-lg ${
+              feature.color === 'blue'
+                ? 'border-blue-100 hover:border-blue-300 hover:shadow-blue-100/50'
+                : 'border-emerald-100 hover:border-emerald-300 hover:shadow-emerald-100/50'
+            }`}
+          >
+            {/* 아이콘 */}
+            <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-colors ${
+              feature.color === 'blue'
+                ? 'bg-blue-50 text-blue-600 group-hover:bg-blue-100'
+                : 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100'
+            }`}>
+              {feature.icon}
+            </div>
+
+            {/* 제목 */}
+            <h2 className="text-lg font-bold text-slate-800 mb-1">{feature.title}</h2>
+            <p className={`text-xs font-medium mb-3 ${
+              feature.color === 'blue' ? 'text-blue-500' : 'text-emerald-500'
+            }`}>
+              {feature.subtitle}
+            </p>
+
+            {/* 설명 */}
+            <p className="text-sm text-slate-500 leading-relaxed mb-4">
+              {feature.description}
+            </p>
+
+            {/* 기능 목록 */}
+            <ul className="space-y-1.5">
+              {feature.items.map((item) => (
+                <li key={item} className="flex items-center gap-2 text-xs text-slate-600">
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                    feature.color === 'blue' ? 'bg-blue-400' : 'bg-emerald-400'
+                  }`} />
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            {/* 화살표 */}
+            <div className={`absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity ${
+              feature.color === 'blue' ? 'text-blue-400' : 'text-emerald-400'
+            }`}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+              </svg>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* 푸터 */}
+      <p className="mt-8 text-[11px] text-slate-400">
+        Powered by Google Gemini 2.5 Flash · 법제처 Open API · KDS 임베딩 검색
+      </p>
+    </div>
   );
 }

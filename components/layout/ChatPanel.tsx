@@ -9,10 +9,10 @@ interface ChatPanelProps {
   messages: ChatMessage[];
   isStreaming: boolean;
   onSendMessage: (content: string) => void;
-  onToggleLawPanel: () => void;
+  onToggleLawPanel?: () => void;
   onToggleFilePanel: () => void;
   filePanelCollapsed: boolean;
-  lawPanelCollapsed: boolean;
+  lawPanelCollapsed?: boolean;
   fileCount: number;
   readyFileCount: number;
   /** 파일 업로드 트리거 (빠른 시작에서 사용) */
@@ -82,20 +82,22 @@ export function ChatPanel({
               </svg>
             </button>
           )}
-          {/* 법령 패널 토글 */}
-          <button
-            onClick={onToggleLawPanel}
-            className={`text-xs px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-              lawPanelCollapsed
-                ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
-                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-            }`}
-            title={lawPanelCollapsed ? '참고 문서 펼치기' : '참고 문서 접기'}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-            </svg>
-          </button>
+          {/* 법령 패널 토글 (3-panel 모드에서만 표시) */}
+          {onToggleLawPanel && (
+            <button
+              onClick={onToggleLawPanel}
+              className={`text-xs px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                lawPanelCollapsed
+                  ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
+                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+              }`}
+              title={lawPanelCollapsed ? '참고 문서 펼치기' : '참고 문서 접기'}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 

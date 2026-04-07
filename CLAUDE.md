@@ -11,10 +11,11 @@
 - **Phase 2.5 완료 (92%)**: DXF 인허가 자동 분석 (PDCA Act-1 완료)
 - **Phase 3 완료**: 법령 API + 3단비교(인용+위임조문) + 조례 바로가기
 - **Phase 4 완료**: 리사이즈 패널 + 업로드 진행률 + 하위폴더 + 법령 탭 개선
-- **Phase 4.5 진행중**: 추가참고문서 기능 + 3단비교 UI 확대 + 패널 접힘 표시
+- **Phase 4.5 완료**: 추가참고문서 기능 + 3단비교 UI 확대 + 패널 접힘 표시
+- **Phase 5 완료**: 멀티페이지 분리 + 참고문서 챗봇 + 법령 UI 대폭 개선 (2026-04-02)
 - **KDS 임베딩 완료**: 상수도+하수도 1,436청크 전체 완료 (100%) — 백업 55.2MB
-- **빌드**: Phase 4.5까지 `npm run build` 성공 확인 (2026-03-31)
-- **미커밋**: Phase 3.5 ~ 4.5 변경사항 모두 미커밋 (40+ 파일)
+- **빌드**: Phase 5까지 `npm run build` 성공 확인 (2026-04-02)
+- **미커밋**: Phase 3.5 ~ 5 변경사항 모두 미커밋 (50+ 파일)
 - **OS: Windows** (cp 대신 copy 명령 사용)
 
 ## ⛔ 절대 금지
@@ -63,9 +64,12 @@ water-sewage-review/
 ├── PROJECT_BRIEFING.md              ← 전체 프로젝트 기획서 (필독)
 ├── PROJECT_STATUS.md                ← 진행 상황 + 남은 작업 상세 (필독★)
 ├── app/
-│   ├── page.tsx                     ✅ 3분할 + 리사이즈 + 패널 접힘 + 추가참고문서
+│   ├── page.tsx                     ✅ 홈 (네비게이션)
+│   ├── review/page.tsx              ✅ 설계검토 페이지 (3분할 레이아웃)
+│   ├── reference/page.tsx           ✅ 참고문서 페이지 (법령+챗봇 리사이즈)
 │   └── api/
 │       ├── chat/route.ts            ✅ Gemini 스트리밍
+│       ├── reference-chat/route.ts  ✅ 참고문서 전용 챗봇 API
 │       ├── parse/route.ts           ✅ PDF/DOCX/XLSX/DXF 파싱
 │       ├── review/route.ts          ✅ 설계 검토 + 인허가 + 이력 저장
 │       ├── embed/route.ts           ✅ 사용자 문서 임베딩 (사업별 격리)
@@ -77,10 +81,11 @@ water-sewage-review/
 ├── components/
 │   ├── layout/
 │   │   ├── ChatPanel.tsx            ✅ 참고 토글 + ReviewHistory
-│   │   ├── FilePanel.tsx            ✅ ProjectManager 통합
-│   │   └── LawPanel.tsx             ✅ "참고 문서" 헤더
+│   │   ├── ReviewLayout.tsx         ✅ 설계검토 3분할 레이아웃
+│   │   └── TopNav.tsx               ✅ 상단 네비게이션 바
 │   ├── chat/
 │   │   ├── MessageList.tsx          ✅ 마크다운 + 모든 카드 렌더링
+│   │   ├── ReferenceChatPanel.tsx   ✅ 참고문서 전용 챗봇 패널
 │   │   ├── DxfAnalysisCard.tsx      ✅ DXF 분석 결과 + 교차 수치
 │   │   ├── ReviewHistory.tsx        ✅ 검토 이력 패널
 │   │   └── ...                      기타 카드 컴포넌트
@@ -89,7 +94,7 @@ water-sewage-review/
 │   │   ├── DropZone.tsx             ✅ XHR 업로드 + 진행률
 │   │   └── FileList.tsx             ✅ 임베딩 상태 배지
 │   └── law/
-│       └── LawNavigator.tsx         ✅ 3단비교(인용+위임) + 새 창 팝업
+│       └── LawNavigator.tsx         ✅ 아코디언 법령목록(21종) + 3단비교 + 목차 + 글꼴조절
 ├── lib/
 │   ├── dxf/                         ✅ 레이어 분류 + 지적 + 공간분석
 │   └── rag/

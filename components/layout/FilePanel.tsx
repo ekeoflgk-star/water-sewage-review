@@ -151,12 +151,15 @@ export function FilePanel({
                         </button>
                       </div>
                     ) : (
-                      <button
+                      <div
+                        role="button"
+                        tabIndex={0}
                         onClick={() => {
                           onSelectSession(session.id);
                           setViewMode('files');
                         }}
-                        className={`group w-full text-left px-3 py-2.5 rounded-lg mb-0.5 transition-colors flex items-center gap-2 ${
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { onSelectSession(session.id); setViewMode('files'); } }}
+                        className={`group w-full text-left px-3 py-2.5 rounded-lg mb-0.5 transition-colors flex items-center gap-2 cursor-pointer ${
                           isActive
                             ? 'bg-slate-200 text-slate-800'
                             : 'text-slate-600 hover:bg-slate-100'
@@ -199,7 +202,7 @@ export function FilePanel({
                             </button>
                           )}
                         </div>
-                      </button>
+                      </div>
                     )}
                   </div>
                 );

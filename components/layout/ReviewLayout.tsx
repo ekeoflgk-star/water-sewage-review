@@ -4,10 +4,9 @@ import { useCallback, useState } from 'react';
 import { Group, Panel, Separator, usePanelRef } from 'react-resizable-panels';
 import { FilePanel } from '@/components/layout/FilePanel';
 import { ChatPanel } from '@/components/layout/ChatPanel';
-import { LawPanel } from '@/components/layout/LawPanel';
 import type { UploadedFile, ChatMessage, Project, Session } from '@/types';
 
-interface ResizableLayoutProps {
+interface ReviewLayoutProps {
   files: UploadedFile[];
   messages: ChatMessage[];
   isStreaming: boolean;
@@ -25,7 +24,6 @@ interface ResizableLayoutProps {
   onRenameProject: (id: string, name: string) => void;
   onMoveFileToProject: (fileId: string, projectId: string | null) => void;
   onNewSession?: () => void;
-  // 세션 관리
   sessions: Session[];
   activeSessionId: string;
   onSelectSession: (sessionId: string) => void;
@@ -34,7 +32,7 @@ interface ResizableLayoutProps {
   onRenameSession: (sessionId: string, newTitle: string) => void;
 }
 
-export function ResizableLayout({
+export function ReviewLayout({
   files,
   messages,
   isStreaming,
@@ -58,14 +56,10 @@ export function ResizableLayout({
   onCreateSession,
   onDeleteSession,
   onRenameSession,
-}: ResizableLayoutProps) {
-  // 패널 접힘 상태 추적
+}: ReviewLayoutProps) {
   const [filePanelCollapsed, setFilePanelCollapsed] = useState(false);
-  const [lawPanelCollapsed, setLawPanelCollapsed] = useState(false);
   const filePanelRef = usePanelRef();
-  const lawPanelRef = usePanelRef();
 
-  // 패널 토글 — collapse/expand
   const handleToggleFilePanel = useCallback(() => {
     if (filePanelCollapsed) {
       filePanelRef.current?.expand();
@@ -76,18 +70,8 @@ export function ResizableLayout({
     }
   }, [filePanelCollapsed, filePanelRef]);
 
-  const handleToggleLawPanel = useCallback(() => {
-    if (lawPanelCollapsed) {
-      lawPanelRef.current?.expand();
-      setLawPanelCollapsed(false);
-    } else {
-      lawPanelRef.current?.collapse();
-      setLawPanelCollapsed(true);
-    }
-  }, [lawPanelCollapsed, lawPanelRef]);
-
   return (
-    <div className="h-screen overflow-hidden bg-white">
+    <div className="h-full overflow-hidden bg-white">
       <Group
         orientation="horizontal"
         style={{ width: '100%', height: '100%' }}
@@ -130,45 +114,24 @@ export function ResizableLayout({
         </Panel>
         <Separator className="panel-resize-handle" />
 
-        {/* 중앙 — 채팅 영역 */}
+        {/* 우측 — 채팅 영역 (전체 너비) */}
         <Panel id="chat-panel" minSize="30%">
           <ChatPanel
             messages={messages}
             isStreaming={isStreaming}
             onSendMessage={onSendMessage}
-            onToggleLawPanel={handleToggleLawPanel}
             onToggleFilePanel={handleToggleFilePanel}
             filePanelCollapsed={filePanelCollapsed}
-            lawPanelCollapsed={lawPanelCollapsed}
             fileCount={files.length}
             readyFileCount={files.filter((f) => f.status === 'ready').length}
             onNewSession={onNewSession}
             onTriggerUpload={() => {
-              // 파일 패널이 접혀있으면 펼치기
               if (filePanelCollapsed) {
                 filePanelRef.current?.expand();
                 setFilePanelCollapsed(false);
               }
             }}
           />
-        </Panel>
-
-        {/* 우측 — 참고 문서 패널 */}
-        <Separator className="panel-resize-handle" />
-        <Panel
-          id="law-panel"
-          defaultSize="280px"
-          minSize="200px"
-          maxSize="70%"
-          collapsible
-          collapsedSize="0px"
-          panelRef={lawPanelRef}
-          onResize={(size) => {
-            const collapsed = size.inPixels === 0 || (lawPanelRef.current?.isCollapsed() ?? false);
-            setLawPanelCollapsed(collapsed);
-          }}
-        >
-          <LawPanel />
         </Panel>
       </Group>
     </div>

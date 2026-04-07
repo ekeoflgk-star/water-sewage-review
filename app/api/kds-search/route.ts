@@ -35,16 +35,25 @@ export async function GET(request: NextRequest) {
       .select('id, source, section, page, content')
       .order('page', { ascending: true });
 
-    // 출처(source) 필터 — "상수도" or "하수도" 등
+    // 출처(source) 필터 — "상수도설계기준" or "하수도설계기준" 등
     if (source) {
       queryBuilder = queryBuilder.ilike('source', `%${source}%`);
     }
 
-    // 텍스트 검색 — content 또는 section에 키워드 포함
+    // 텍스트 검색 — 키워드를 공백으로 분리하여 각각 AND 검색
+    // "하수도 관로" → content에 "하수도" AND "관로" 모두 포함
     if (query) {
-      queryBuilder = queryBuilder.or(
-        `content.ilike.%${query}%,section.ilike.%${query}%`
-      );
+      const keywords = query.trim().split(/\s+/).filter((w: string) => w.length >= 1);
+      if (keywords.length === 1) {
+        queryBuilder = queryBuilder.or(
+          `content.ilike.%${keywords[0]}%,section.ilike.%${keywords[0]}%`
+        );
+      } else {
+        // 다중 키워드 — 각 키워드가 content에 모두 포함되어야 함
+        for (const kw of keywords) {
+          queryBuilder = queryBuilder.ilike('content', `%${kw}%`);
+        }
+      }
     }
 
     const { data, error } = await queryBuilder.limit(limit);

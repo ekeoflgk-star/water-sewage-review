@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { TopNav } from '@/components/layout/TopNav';
 import { ToastProvider } from '@/components/ui/Toast';
 import './globals.css';
 
@@ -14,9 +15,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body className="antialiased">
+      <body className="antialiased h-screen flex flex-col overflow-hidden">
         <ToastProvider>
-          {children}
+          <TopNav />
+          <main className="flex-1 overflow-hidden">
+            {children}
+          </main>
         </ToastProvider>
       </body>
     </html>

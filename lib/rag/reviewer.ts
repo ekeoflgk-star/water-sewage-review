@@ -101,16 +101,26 @@ export async function extractDesignValues(
     ? '하수도 관로시설 관련 수치를 중점 추출: 유속, 관경, 토피, 경사, 충만도, 맨홀간격 등'
     : '모든 설계 수치를 추출';
 
-  const prompt = `다음 설계 문서에서 설계 수치를 JSON 배열로 추출하세요.
+  const prompt = `당신은 상하수도 설계 문서에서 **설계값(실제 적용된 값)**만 정확히 추출하는 전문가입니다.
+
+## 중요 규칙:
+1. **문서에 명시된 실제 설계값만 추출**하세요. 기준값·법적 기준·최소기준 등은 추출하지 마세요.
+2. 표(table)에서 추출할 때 "설계값", "적용값", "계획값" 열의 수치를 읽으세요.
+3. "기준값", "법적 기준", "최소", "이상", "이하" 등과 함께 나오는 값은 기준값이므로 제외하세요.
+4. 관종(PE관, DCIP관 등)과 관경은 반드시 짝으로 추출하세요.
+5. 수치는 문서에 적힌 그대로 정확히 읽으세요. 절대 반올림하거나 추측하지 마세요.
+
 ${categoryGuide}
 
 아래 JSON 배열 형식으로 출력하세요:
 [
-  { "itemName": "항목명", "value": 수치값, "unit": "단위", "location": "문서 내 위치" }
+  { "itemName": "항목명 (관종 포함)", "value": 수치값, "unit": "단위", "location": "문서 내 위치 (페이지·표·행 등)" }
 ]
 
+예시: [{"itemName": "PE관 관경", "value": 200, "unit": "mm", "location": "관로 제원표 3행"}]
+
 ## 문서 내용:
-${fileContent.slice(0, 15000)}`;
+${fileContent.slice(0, 50000)}`;
 
   try {
     // JSON 전용 모델 사용 (마크다운 출력 방지)
@@ -123,12 +133,21 @@ ${fileContent.slice(0, 15000)}`;
     const arr = Array.isArray(parsed) ? parsed : (parsed?.items || parsed?.data || []);
     if (!Array.isArray(arr) || arr.length === 0) return [];
 
-    return arr.map((item: { itemName?: string; value?: number | string; unit?: string; location?: string }) => ({
+    const designValues = arr.map((item: { itemName?: string; value?: number | string; unit?: string; location?: string }) => ({
       itemName: String(item.itemName || ''),
       value: item.value ?? '',
       unit: String(item.unit || ''),
       location: String(item.location || ''),
     }));
+
+    // 디버그: 추출된 설계값 출력
+    console.log(`[Reviewer] 설계값 ${designValues.length}개 추출됨:`);
+    designValues.forEach((dv, i) => {
+      console.log(`  [${i + 1}] ${dv.itemName}: ${dv.value} ${dv.unit} (${dv.location})`);
+    });
+    console.log(`[Reviewer] 문서 원본 길이: ${fileContent.length}자, Gemini에 전달: ${Math.min(fileContent.length, 50000)}자`);
+
+    return designValues;
   } catch (error) {
     console.error('[Reviewer] 설계값 추출 실패:', error);
     return [];
@@ -354,10 +373,15 @@ async function geminiDirectReview(
   const jsonModel = getGeminiModelJSON();
   const prompt = `당신은 상하수도 설계 검토 전문가입니다.
 다음 문서를 검토하고 주요 항목별 적합/부적합을 판정하세요.
+
+## 중요 규칙:
+1. **문서에 명시된 실제 설계값(적용값)을 정확히 읽어서** 기준값과 비교하세요.
+2. 기준값과 설계값을 절대 혼동하지 마세요. designValue에는 문서에 적힌 실제 값을 적으세요.
+3. 관종(PE관, DCIP관 등)별로 관경·유속 등을 구분하여 검토하세요.
 ${refDocResults.length > 0 ? '\n**중요**: 추가참고문서(발주처 가이드라인·조례 등)가 있는 경우 KDS보다 우선 적용합니다. 추가참고문서에 명시된 기준이 KDS와 다를 경우, 추가참고문서 기준으로 판정하세요.\n' : ''}${refDocContext}${kdsContext}
 
 ## 문서 내용:
-${fileContent.slice(0, 15000)}
+${fileContent.slice(0, 50000)}
 
 아래 JSON 배열 형식으로 출력하세요:
 [

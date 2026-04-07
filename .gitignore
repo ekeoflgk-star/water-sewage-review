@@ -35,9 +35,21 @@ yarn-error.log*
 # bkit plugin
 .bkit/
 
-# KDS PDF 원본 (용량 큼)
+# KDS PDF 원본 (용량 큼 — data 폴더만 제외)
 /data/kds/*.pdf
-/public/kds/*.pdf
+# public/kds/kds-*.pdf 는 뷰어용이므로 커밋 포함
+/public/kds/상수도설계기준*.pdf
+/public/kds/하수도설계기준*.pdf
+
+# PDF.js worker (postinstall로 자동 복사)
+/public/pdf.worker.min.mjs
+
+# KCS 시방서 원본 (KCSC 다운로드)
+/data/kcs-hwp/
+/data/kcs-pdf/
+
+# 변환된 이미지 (Supabase Storage 업로드용)
+/data/doc-images/
 
 # 임베딩 백업 (54MB+)
 /data/backup/
