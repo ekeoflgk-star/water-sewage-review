@@ -12,6 +12,9 @@ const NAV_ITEMS = [
 export function TopNav() {
   const pathname = usePathname();
 
+  // 로그인 페이지에서는 TopNav 숨김
+  if (pathname === '/login') return null;
+
   return (
     <nav className="h-11 border-b border-slate-200 bg-white flex items-center px-4 shrink-0">
       {/* 로고 */}
