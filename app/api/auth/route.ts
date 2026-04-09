@@ -1,15 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-/** 간단한 해시 — middleware.ts와 동일한 함수 */
-function hashPassword(pw: string): string {
-  let hash = 0;
-  for (let i = 0; i < pw.length; i++) {
-    const ch = pw.charCodeAt(i);
-    hash = ((hash << 5) - hash) + ch;
-    hash |= 0;
-  }
-  return 'auth_' + Math.abs(hash).toString(36);
-}
+import { hashPassword } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {

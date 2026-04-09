@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { hashPassword } from '@/lib/auth';
 
 // 보호 제외 경로 (로그인 페이지, 정적 파일, favicon 등)
 const PUBLIC_PATHS = ['/login', '/api/auth', '/_next', '/favicon.ico', '/pdf.worker.min.mjs'];
@@ -33,17 +34,6 @@ export function middleware(request: NextRequest) {
   const loginUrl = new URL('/login', request.url);
   loginUrl.searchParams.set('from', pathname);
   return NextResponse.redirect(loginUrl);
-}
-
-/** 간단한 해시 (비밀번호 원문을 쿠키에 저장하지 않기 위함) */
-function hashPassword(pw: string): string {
-  let hash = 0;
-  for (let i = 0; i < pw.length; i++) {
-    const ch = pw.charCodeAt(i);
-    hash = ((hash << 5) - hash) + ch;
-    hash |= 0;
-  }
-  return 'auth_' + Math.abs(hash).toString(36);
 }
 
 export const config = {

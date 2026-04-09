@@ -40,6 +40,8 @@ NEXT_PUBLIC_SUPABASE_URL=       # Supabase 프로젝트 URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY=  # Supabase anon key
 SUPABASE_SERVICE_ROLE_KEY=      # Supabase service role key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+SITE_PASSWORD=review2026        # 사내 접근 비밀번호 (필수)
+ALLOWED_IPS=                    # 회사 고정 IP (쉼표 구분, 비워두면 IP 체크 건너뜀)
 ```
 
 ## 즉시 해야 할 작업
@@ -63,11 +65,14 @@ water-sewage-review/
 ├── CLAUDE.md                        ← 이 파일
 ├── PROJECT_BRIEFING.md              ← 전체 프로젝트 기획서 (필독)
 ├── PROJECT_STATUS.md                ← 진행 상황 + 남은 작업 상세 (필독★)
+├── middleware.ts                    ✅ 접근 제한 (IP 화이트리스트 + 쿠키 인증)
 ├── app/
 │   ├── page.tsx                     ✅ 홈 (네비게이션)
+│   ├── login/page.tsx               ✅ 로그인 페이지 (공유 비밀번호)
 │   ├── review/page.tsx              ✅ 설계검토 페이지 (3분할 레이아웃)
 │   ├── reference/page.tsx           ✅ 참고문서 페이지 (법령+챗봇 리사이즈)
 │   └── api/
+│       ├── auth/route.ts            ✅ 비밀번호 검증 + 쿠키 발급
 │       ├── chat/route.ts            ✅ Gemini 스트리밍
 │       ├── reference-chat/route.ts  ✅ 참고문서 전용 챗봇 API
 │       ├── parse/route.ts           ✅ PDF/DOCX/XLSX/DXF 파싱
