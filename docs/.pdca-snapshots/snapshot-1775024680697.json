@@ -1,0 +1,2563 @@
+{
+  "timestamp": "2026-04-01T06:24:40.696Z",
+  "reason": "compaction",
+  "status": {
+    "version": "2.0",
+    "lastUpdated": "2026-04-01T06:24:40.474Z",
+    "activeFeatures": [
+      "dxf-permit-analysis",
+      "phase2-rag-review",
+      "water-sewage-review",
+      "rag",
+      "scripts",
+      "review",
+      "embed",
+      "chat",
+      "law",
+      "layout",
+      "report",
+      "parsers",
+      "dxf",
+      "parse",
+      "file",
+      "dxf-analyze",
+      "history",
+      "export-docx",
+      "reference"
+    ],
+    "primaryFeature": "dxf-permit-analysis",
+    "features": {
+      "phase2-rag-review": {
+        "phase": "design",
+        "phaseNumber": 2,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [
+          "FR-01: KDS pgvector 임베딩",
+          "FR-02: Gemini Embedding API",
+          "FR-03: RAG 벡터 검색",
+          "FR-04: 출처 태그",
+          "FR-05: 설계값 vs 기준값 비교 판정",
+          "FR-06: ReviewCard 렌더링",
+          "FR-07: 인허가 15종 판정",
+          "FR-08: PermitCard 렌더링",
+          "FR-09: Layer 2 임시 임베딩",
+          "FR-10: Layer 1+2 동시 검색",
+          "FR-11: KDS 임베딩 CLI 스크립트"
+        ],
+        "documents": {
+          "plan": "docs/01-plan/features/phase2-rag-review.plan.md",
+          "design": "docs/02-design/features/phase2-rag-review.design.md"
+        },
+        "timestamps": {
+          "started": "2026-03-24T07:00:00.000Z",
+          "lastUpdated": "2026-03-24T07:00:00.000Z"
+        }
+      },
+      "water-sewage-review": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-24T06:53:48.803Z",
+          "lastUpdated": "2026-04-01T06:21:12.725Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\app\\layout.tsx"
+      },
+      "rag": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-24T06:54:39.913Z",
+          "lastUpdated": "2026-03-27T02:26:52.354Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\lib\\rag\\reviewer.ts"
+      },
+      "scripts": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-24T07:33:34.362Z",
+          "lastUpdated": "2026-03-31T05:42:57.232Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\scripts\\check-db.ts"
+      },
+      "review": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-24T07:34:58.807Z",
+          "lastUpdated": "2026-04-01T06:19:38.756Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\app\\review\\page.tsx"
+      },
+      "embed": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-24T07:35:11.971Z",
+          "lastUpdated": "2026-03-31T01:26:17.925Z"
+        },
+        "lastFile": "D:/우종현/100.AI실무 아이템/01-2.설계 품질 검토/water-sewage-review/app/api/embed/route.ts"
+      },
+      "chat": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-24T07:35:28.042Z",
+          "lastUpdated": "2026-03-31T06:40:32.334Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\components\\chat\\MessageList.tsx"
+      },
+      "law": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-24T10:42:58.727Z",
+          "lastUpdated": "2026-04-01T06:24:40.474Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\components\\law\\LawNavigator.tsx"
+      },
+      "layout": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-24T10:44:19.951Z",
+          "lastUpdated": "2026-04-01T06:22:08.173Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\components\\layout\\ChatPanel.tsx"
+      },
+      "report": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-24T10:49:10.920Z",
+          "lastUpdated": "2026-03-24T10:51:43.130Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\app\\api\\report\\route.ts"
+      },
+      "parsers": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-25T02:08:00.571Z",
+          "lastUpdated": "2026-03-31T06:41:23.438Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\lib\\parsers\\client.ts"
+      },
+      "dxf": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-25T02:08:20.093Z",
+          "lastUpdated": "2026-03-25T06:02:04.113Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\lib\\dxf\\spatial-analyzer.ts"
+      },
+      "parse": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-25T02:09:49.130Z",
+          "lastUpdated": "2026-03-25T02:09:49.130Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\app\\api\\parse\\route.ts"
+      },
+      "file": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-25T02:09:53.769Z",
+          "lastUpdated": "2026-03-31T06:38:32.037Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\components\\file\\DropZone.tsx"
+      },
+      "dxf-analyze": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-25T02:10:14.807Z",
+          "lastUpdated": "2026-03-31T01:24:22.358Z"
+        },
+        "lastFile": "D:/우종현/100.AI실무 아이템/01-2.설계 품질 검토/water-sewage-review/app/api/dxf-analyze/route.ts"
+      },
+      "history": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-25T05:49:14.311Z",
+          "lastUpdated": "2026-03-25T05:49:14.311Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\app\\api\\history\\route.ts"
+      },
+      "export-docx": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-03-25T06:59:51.094Z",
+          "lastUpdated": "2026-03-25T07:03:42.712Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\app\\api\\export-docx\\route.ts"
+      },
+      "reference": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-04-01T06:20:10.662Z",
+          "lastUpdated": "2026-04-01T06:20:10.662Z"
+        },
+        "lastFile": "D:\\우종현\\100.AI실무 아이템\\01-2.설계 품질 검토\\water-sewage-review\\app\\reference\\page.tsx"
+      }
+    },
+    "pipeline": {
+      "currentPhase": 2,
+      "level": "Dynamic",
+      "phaseHistory": [
+        {
+          "phase": 1,
+          "completedAt": "2026-03-24T06:30:00.000Z",
+          "note": "Phase 1 완료: UI 골격 + 파일 파싱 + Gemini 채팅 + 품질 개선"
+        }
+      ]
+    },
+    "session": {
+      "startedAt": "2026-03-24T06:42:53.758Z",
+      "onboardingCompleted": true,
+      "lastActivity": "2026-04-01T06:24:40.474Z"
+    },
+    "history": [
+      {
+        "timestamp": "2026-03-24T07:00:00.000Z",
+        "feature": "phase2-rag-review",
+        "phase": "plan",
+        "action": "created"
+      },
+      {
+        "timestamp": "2026-03-24T07:10:00.000Z",
+        "feature": "phase2-rag-review",
+        "phase": "design",
+        "action": "created"
+      },
+      {
+        "timestamp": "2026-03-24T06:53:48.803Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T06:54:39.913Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T06:55:15.557Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T06:56:11.661Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T07:33:34.362Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T07:34:16.783Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T07:34:41.057Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T07:34:58.807Z",
+        "feature": "review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T07:35:11.971Z",
+        "feature": "embed",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T07:35:28.042Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T07:35:40.612Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T07:35:48.123Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T07:35:54.712Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T07:36:28.303Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T07:36:34.866Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T07:37:38.628Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T07:38:00.357Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:31:17.106Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:31:17.955Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:31:58.474Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:33:56.235Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:42:58.727Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:43:19.160Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:43:49.421Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:44:04.346Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:44:06.888Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:44:19.951Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:48:05.738Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:48:43.768Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:49:10.920Z",
+        "feature": "report",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:49:28.757Z",
+        "feature": "report",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:49:37.304Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:49:46.881Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:49:51.915Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:49:52.423Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:50:09.246Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:50:20.506Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:50:52.333Z",
+        "feature": "report",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:50:56.794Z",
+        "feature": "report",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:51:33.004Z",
+        "feature": "report",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T10:51:43.130Z",
+        "feature": "report",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:03:33.740Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:04:21.272Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:04:29.289Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:04:37.351Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:11:47.888Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:11:49.316Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:12:04.334Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:12:45.424Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:12:52.453Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:45:35.305Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:46:46.045Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:46:54.221Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:48:52.032Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:48:57.010Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:56:20.283Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:56:31.326Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T11:59:11.084Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T12:05:17.244Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T12:05:49.218Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T12:06:21.685Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T12:07:34.728Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T12:08:05.201Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T12:09:10.617Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T12:10:50.383Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-24T12:10:55.001Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T00:06:12.334Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:00:00.000Z",
+        "feature": "dxf-permit-analysis",
+        "phase": "plan",
+        "action": "created"
+      },
+      {
+        "timestamp": "2026-03-25T02:07:16.767Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:07:30.096Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:08:00.571Z",
+        "feature": "parsers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:08:20.093Z",
+        "feature": "dxf",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:09:00.867Z",
+        "feature": "dxf",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:09:18.647Z",
+        "feature": "dxf",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:09:27.426Z",
+        "feature": "parsers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:09:33.161Z",
+        "feature": "parsers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:09:43.385Z",
+        "feature": "parsers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:09:49.130Z",
+        "feature": "parse",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:09:53.769Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:09:59.057Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:10:03.633Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:10:14.807Z",
+        "feature": "dxf-analyze",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:10:41.787Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:10:50.785Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:11:01.278Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:11:07.339Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:11:13.629Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:11:19.940Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:11:27.388Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:12:03.034Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:12:08.061Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:12:56.868Z",
+        "feature": "dxf",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:13:19.040Z",
+        "feature": "dxf",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:13:52.720Z",
+        "feature": "parsers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:19:32.238Z",
+        "feature": "dxf",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:21:35.597Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:21:42.209Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:21:48.049Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:21:56.171Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:22:02.821Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:22:08.239Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T02:57:00.089Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T04:17:28.705Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T04:17:46.779Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T04:18:38.601Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T04:44:48.021Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T04:45:09.280Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T04:45:26.970Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T05:49:14.311Z",
+        "feature": "history",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T05:49:31.647Z",
+        "feature": "review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T05:49:41.127Z",
+        "feature": "review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T05:50:58.167Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T05:51:29.449Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T05:53:24.591Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T05:55:54.763Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T05:56:53.506Z",
+        "feature": "dxf",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T05:57:23.774Z",
+        "feature": "dxf",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T05:57:50.717Z",
+        "feature": "dxf",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T05:58:54.296Z",
+        "feature": "dxf",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:00:22.338Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:01:46.371Z",
+        "feature": "dxf",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:02:04.113Z",
+        "feature": "dxf",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:04:13.159Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:04:24.045Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:04:40.161Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:05:03.949Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:05:29.318Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:05:41.086Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:05:50.978Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:55:23.739Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:55:32.226Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:55:57.306Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:56:15.166Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:57:09.547Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:57:31.736Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:58:16.086Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:59:01.391Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T06:59:51.094Z",
+        "feature": "export-docx",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:01:16.276Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:02:25.298Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:03:18.486Z",
+        "feature": "export-docx",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:03:42.712Z",
+        "feature": "export-docx",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:20:17.792Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:20:27.667Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:20:34.677Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:20:44.918Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:20:51.488Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:21:09.851Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:21:27.845Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:21:43.338Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:22:01.941Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:22:19.025Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:23:43.975Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:23:49.237Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:24:37.593Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-25T07:24:44.113Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:40:02.700Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:40:07.293Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:40:19.558Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:40:23.554Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:40:34.877Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:40:41.398Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:41:01.331Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:56:37.414Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:56:49.728Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:56:56.250Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:57:00.155Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:57:51.355Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:58:44.643Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:59:01.510Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-26T23:59:49.562Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:00:26.468Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:01:00.901Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:01:08.371Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:01:24.040Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:01:47.025Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:02:13.135Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:02:55.746Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:03:20.501Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:03:31.295Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:03:36.689Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:03:45.220Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:03:50.042Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:04:00.904Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:04:05.838Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:04:47.997Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:05:09.658Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:05:22.950Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:05:37.498Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:05:50.560Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:06:07.142Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:06:34.655Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:07:01.109Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:15:52.746Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:19:17.001Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:19:37.163Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:19:45.371Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:19:54.568Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:20:20.651Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:20:29.398Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:20:38.652Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:20:45.983Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T00:46:28.409Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T01:45:02.434Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T01:55:04.254Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T01:55:14.951Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T01:55:39.741Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T01:56:13.635Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T01:56:26.316Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T01:56:44.421Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T01:57:00.222Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:20:09.585Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:20:35.258Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:20:48.769Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:20:59.723Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:21:18.819Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:21:24.546Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:21:33.175Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:21:46.399Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:25:45.963Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:25:47.380Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:25:49.454Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:25:55.922Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:26:00.031Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:26:00.494Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:26:01.799Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:26:04.497Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:26:05.908Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:26:11.313Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:26:12.772Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:26:14.110Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:26:31.489Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T02:26:52.354Z",
+        "feature": "rag",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T03:32:32.063Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T03:32:57.958Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T03:33:18.988Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T03:34:05.221Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T03:54:00.021Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T03:56:22.342Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T03:56:26.943Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:11:43.716Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:11:45.980Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:11:49.947Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:12:30.128Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:13:04.111Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:22:35.226Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:22:49.576Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:23:01.456Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:23:09.487Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:24:26.360Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:25:38.569Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:25:53.140Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:26:05.844Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:26:18.321Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:26:23.706Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-27T04:26:27.957Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T05:34:13.025Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T05:34:39.347Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T05:34:57.960Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T05:39:31.216Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T05:39:36.094Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T05:46:24.922Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T05:46:31.194Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T05:46:36.159Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T05:48:30.236Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T05:49:47.214Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:41:05.788Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:41:13.706Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:41:19.398Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:41:45.450Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:41:51.047Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:42:04.358Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:42:34.182Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:42:41.224Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:42:54.865Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:43:09.678Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:43:21.907Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:43:55.086Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:43:59.839Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:45:00.994Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-30T06:52:51.348Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T00:02:55.422Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T00:05:58.282Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T00:06:12.986Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T01:24:22.358Z",
+        "feature": "dxf-analyze",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T01:24:47.565Z",
+        "feature": "review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T01:25:13.662Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T01:25:25.653Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T01:25:53.471Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T01:26:17.925Z",
+        "feature": "embed",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T01:27:10.251Z",
+        "feature": "review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T02:29:42.885Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T02:30:15.476Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T02:31:27.822Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:13:30.676Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:13:50.906Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:14:21.473Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:14:33.749Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:14:43.534Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:15:03.814Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:15:24.742Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:15:50.010Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:15:55.266Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:15:59.566Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:16:07.253Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:16:30.811Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:16:44.336Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:17:02.235Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:17:09.469Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:17:16.089Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:17:28.472Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:18:22.900Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:18:50.586Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:19:08.183Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:19:30.670Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T04:43:33.873Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T05:07:14.031Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T05:21:25.037Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T05:21:39.338Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T05:22:17.319Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T05:42:57.232Z",
+        "feature": "scripts",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T06:38:08.446Z",
+        "feature": "parsers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T06:38:15.680Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T06:38:32.037Z",
+        "feature": "file",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T06:38:57.735Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T06:39:37.843Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T06:39:55.986Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T06:40:09.602Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T06:40:26.345Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T06:40:32.334Z",
+        "feature": "chat",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T06:40:41.031Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T06:41:23.438Z",
+        "feature": "parsers",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:11:43.455Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:12:00.767Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:12:51.894Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:13:03.164Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:13:07.715Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:13:15.106Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:13:22.976Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:13:29.873Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:13:45.343Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:13:56.278Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:14:12.581Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:14:18.623Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:22:36.847Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:22:58.220Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:23:17.657Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:23:29.986Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:23:42.674Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:24:22.884Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-03-31T10:24:30.930Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T02:08:37.240Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T02:08:43.691Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T02:08:51.443Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T02:09:08.231Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T02:09:14.007Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T02:09:22.170Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T02:35:23.325Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T02:35:27.965Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T06:16:41.880Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T06:17:24.904Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T06:19:38.756Z",
+        "feature": "review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T06:20:10.662Z",
+        "feature": "reference",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T06:20:52.830Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T06:21:12.725Z",
+        "feature": "water-sewage-review",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T06:21:47.118Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T06:22:08.173Z",
+        "feature": "layout",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T06:22:34.074Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T06:23:23.402Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T06:23:46.752Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-04-01T06:24:40.474Z",
+        "feature": "law",
+        "phase": "do",
+        "action": "updated"
+      }
+    ],
+    "dxf-permit-analysis": {
+      "phase": "check",
+      "phaseNumber": 4,
+      "matchRate": 92,
+      "iterationCount": 1,
+      "requirements": [
+        "FR-01: DXF 파일 파싱 (레이어/엔티티/텍스트 추출)",
+        "FR-02: 레이어 접두사 분류 ($설계, #인허가)",
+        "FR-03: # 레이어 → 인허가 자동 매핑 (Phase A)",
+        "FR-04: 지적도 텍스트 파싱 (번지+지목)",
+        "FR-05: 도넛형 필지 포함관계 분석",
+        "FR-06: 텍스트 point-in-polygon 필지 매칭",
+        "FR-07: 지목 → 전용/점용 허가 매핑",
+        "FR-08: 공간 교차 분석 (Phase B)",
+        "FR-09: 교차 면적/연장 산출",
+        "FR-10: PermitGuide 연동",
+        "FR-11: CAD 레이어 표준 컨벤션 정의서"
+      ],
+      "documents": {
+        "plan": "docs/01-plan/features/dxf-permit-analysis.plan.md",
+        "design": "docs/02-design/features/dxf-permit-analysis.design.md"
+      },
+      "timestamps": {
+        "started": "2026-03-25T06:00:00.000Z",
+        "lastUpdated": "2026-03-25T06:30:00.000Z"
+      }
+    }
+  }
+}
